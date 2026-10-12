@@ -11,6 +11,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { SearchModal } from "./search-modal";
+import { ThemeToggle } from "./theme-toggle";
 
 type NavChild = {
   href: string;
@@ -645,6 +646,7 @@ export function Navbar() {
             })}
           </nav>
           <div className="flex items-center gap-2">
+            <ThemeToggle variant="glass" size="md" />
 
             <button
               type="button"

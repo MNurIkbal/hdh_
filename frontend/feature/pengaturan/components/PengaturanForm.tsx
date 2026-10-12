@@ -404,9 +404,12 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-gradient-to-r
             from-slate-50
             to-white
+            dark:from-slate-900
+            dark:to-slate-900/80
             p-5
           "
         >
@@ -433,6 +436,7 @@ export default function PengaturanForm() {
                 text-lg
                 font-bold
                 text-slate-800
+                dark:text-slate-100
               "
             >
               Pengaturan Website
@@ -443,6 +447,7 @@ export default function PengaturanForm() {
                 mt-0.5
                 text-sm
                 text-slate-500
+                dark:text-slate-400
               "
             >
               Kelola informasi organisasi, JDIH, dan informasi kontak.
@@ -459,7 +464,9 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-white
+            dark:bg-slate-900
             p-5
             shadow-sm
             sm:p-6
@@ -475,20 +482,22 @@ export default function PengaturanForm() {
                 justify-center
                 rounded-lg
                 bg-blue-50
+                dark:bg-blue-950/50
                 text-sm
                 font-bold
                 text-blue-600
+                dark:text-blue-400
               "
             >
               01
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                 Informasi Organisasi
               </h3>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Informasi umum organisasi
               </p>
             </div>
@@ -512,7 +521,9 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-white
+            dark:bg-slate-900
             p-5
             shadow-sm
             sm:p-6
@@ -528,20 +539,22 @@ export default function PengaturanForm() {
                 justify-center
                 rounded-lg
                 bg-blue-50
+                dark:bg-blue-950/50
                 text-sm
                 font-bold
                 text-blue-600
+                dark:text-blue-400
               "
             >
               02
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                 Informasi Tentang JDIH
               </h3>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Informasi menu tentang JDIH
               </p>
             </div>
@@ -566,7 +579,9 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-white
+            dark:bg-slate-900
             p-5
             shadow-sm
             sm:p-6
@@ -582,20 +597,22 @@ export default function PengaturanForm() {
                 justify-center
                 rounded-lg
                 bg-blue-50
+                dark:bg-blue-950/50
                 text-sm
                 font-bold
                 text-blue-600
+                dark:text-blue-400
               "
             >
               03
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                 Informasi Sejarah
               </h3>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Informasi menu sejarah
               </p>
             </div>
@@ -620,7 +637,9 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-white
+            dark:bg-slate-900
             p-5
             shadow-sm
             sm:p-6
@@ -636,20 +655,22 @@ export default function PengaturanForm() {
                 justify-center
                 rounded-lg
                 bg-indigo-50
+                dark:bg-indigo-950/50
                 text-sm
                 font-bold
                 text-indigo-600
+                dark:text-indigo-400
               "
             >
               04
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                 Informasi Hukum
               </h3>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Informasi menu dasar hukum
               </p>
             </div>
@@ -674,7 +695,9 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-white
+            dark:bg-slate-900
             p-5
             shadow-sm
             sm:p-6
@@ -690,20 +713,22 @@ export default function PengaturanForm() {
                 justify-center
                 rounded-lg
                 bg-indigo-50
+                dark:bg-indigo-950/50
                 text-sm
                 font-bold
                 text-indigo-600
+                dark:text-indigo-400
               "
             >
               05
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                 Informasi JDIH Perwakilan
               </h3>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Informasi menu JDIH perwakilan
               </p>
             </div>
@@ -728,7 +753,9 @@ export default function PengaturanForm() {
             rounded-2xl
             border
             border-slate-200
+            dark:border-slate-800
             bg-white
+            dark:bg-slate-900
             p-5
             shadow-sm
             sm:p-6
@@ -744,20 +771,22 @@ export default function PengaturanForm() {
                 justify-center
                 rounded-lg
                 bg-emerald-50
+                dark:bg-emerald-950/50
                 text-sm
                 font-bold
                 text-emerald-600
+                dark:text-emerald-400
               "
             >
               06
             </div>
 
             <div>
-              <h3 className="font-semibold text-slate-800">
+              <h3 className="font-semibold text-slate-800 dark:text-slate-100">
                 Informasi Kontak
               </h3>
 
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 dark:text-slate-500">
                 Alamat dan informasi kontak
               </p>
             </div>
@@ -822,6 +851,7 @@ export default function PengaturanForm() {
             gap-3
             border-t
             border-slate-200
+            dark:border-slate-800
             pt-5
             sm:flex-row
             sm:justify-end
@@ -842,15 +872,20 @@ export default function PengaturanForm() {
               rounded-xl
               border
               border-slate-200
+              dark:border-slate-800
               bg-white
+              dark:bg-slate-900
               px-5
               py-2.5
               text-sm
               font-semibold
               text-slate-600
+              dark:text-slate-300
               transition
               hover:bg-slate-50
+              dark:hover:bg-slate-800
               hover:text-slate-800
+              dark:hover:text-white
               disabled:cursor-not-allowed
               disabled:opacity-50
             "

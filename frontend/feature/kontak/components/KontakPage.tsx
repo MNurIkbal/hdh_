@@ -274,16 +274,16 @@ function KontakContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-5 py-8 sm:px-7 lg:px-8 lg:py-10">
+    <div className="w-full px-5 py-8 sm:px-7 lg:px-8 lg:py-10">
       {toast.open && (
         <div className="fixed right-5 top-5 z-[9999] w-[calc(100%-2.5rem)] max-w-md">
           <div
-            className={`flex items-start gap-3 rounded-xl border bg-white p-4 shadow-xl ${
+            className={`flex items-start gap-3 rounded-xl border bg-white dark:bg-slate-900 p-4 shadow-xl ${
               toast.type === "success"
-                ? "border-emerald-200"
+                ? "border-emerald-200 dark:border-emerald-800/60"
                 : toast.type === "error"
-                  ? "border-red-200"
-                  : "border-blue-200"
+                  ? "border-red-200 dark:border-red-800/60"
+                  : "border-blue-200 dark:border-blue-800/60"
             }`}
           >
             <div className="mt-0.5 shrink-0">
@@ -295,11 +295,11 @@ function KontakContent() {
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-800">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                 {toast.title}
               </p>
 
-              <p className="mt-1 text-sm leading-5 text-slate-500">
+              <p className="mt-1 text-sm leading-5 text-slate-500 dark:text-slate-400">
                 {toast.message}
               </p>
             </div>
@@ -312,7 +312,7 @@ function KontakContent() {
                   open: false,
                 }))
               }
-              className="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+              className="shrink-0 rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 dark:hover:text-slate-200"
               aria-label="Tutup notifikasi"
             >
               <X className="h-4 w-4" />

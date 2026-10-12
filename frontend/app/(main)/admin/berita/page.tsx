@@ -6,6 +6,7 @@ import { useState } from "react";
 import AdminNavbar from "@/feature/layouts/AdminNavbar";
 import AdminSidebar from "@/feature/layouts/AdminSidebar";
 import AdminFooter from "@/feature/layouts/AdminFooter";
+import AdminBackground from "@/feature/layouts/AdminBackground";
 
 import BeritaComponent from "@/feature/berita/components/BeritaComponent";
 
@@ -13,22 +14,22 @@ export default function BeritaPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-
+    <div className="min-h-screen bg-slate-100/70 text-slate-900 transition-colors duration-300 dark:bg-[#070D18] dark:text-slate-100">
       <AdminSidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="lg:pl-[270px]">
-
+      <div className="lg:pl-[275px] flex flex-col min-h-screen">
         <AdminNavbar
-          onMenuClick={() =>
-            setSidebarOpen(true)
-          }
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Berita & Publikasi"
+          subtitle="Manajemen artikel berita dan siaran pers"
         />
 
-        <BeritaComponent />
+        <main className="flex-1">
+          <BeritaComponent />
+        </main>
 
         <AdminFooter />
       </div>

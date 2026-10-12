@@ -79,10 +79,14 @@ export default function Drawer({
           ${WIDTH_CLASS[width]}
           flex-col
           bg-white
+          border-l
+          border-slate-200
           shadow-[-20px_0_60px_rgba(15,23,42,0.12)]
           transition-transform
           duration-300
           ease-out
+          dark:border-slate-800
+          dark:bg-slate-900
           ${open ? "translate-x-0" : "translate-x-full"}
         `}
       >
@@ -95,6 +99,7 @@ export default function Drawer({
             border-b
             border-slate-100
             px-6
+            dark:border-slate-800
           "
         >
           <div>
@@ -105,6 +110,7 @@ export default function Drawer({
                 font-bold
                 tracking-tight
                 text-slate-800
+                dark:text-slate-100
               "
             >
               {defaultTitle}
@@ -125,6 +131,9 @@ export default function Drawer({
               transition
               hover:bg-slate-50
               hover:text-slate-700
+              dark:border-slate-700
+              dark:hover:bg-slate-800
+              dark:hover:text-slate-200
             "
           >
             <X size={17} />

@@ -58,11 +58,47 @@ export interface ChatFile {
   type: string
 }
 
+export interface ComparisonItem {
+  kategori: string;
+  doc1Value: string;
+  doc2Value: string;
+  analisis: string;
+}
+
+export interface ComparisonData {
+  doc1: {
+    id: number | string;
+    judul: string;
+    nomor?: string;
+    tahun?: string;
+    status?: string;
+    tanggal_penetapan?: string;
+    tanggal_berlaku?: string;
+    sumber?: string;
+    tempat_penetapan?: string;
+  };
+  doc2: {
+    id: number | string;
+    judul: string;
+    nomor?: string;
+    tahun?: string;
+    status?: string;
+    tanggal_penetapan?: string;
+    tanggal_berlaku?: string;
+    sumber?: string;
+    tempat_penetapan?: string;
+  };
+  items: ComparisonItem[];
+  kesimpulan?: string;
+  rekomendasi?: string;
+}
+
 export interface ChatMessage {
   id: number | string
   type: ChatRole
   message: string
   files?: ChatFile[]
+  comparisonData?: ComparisonData
   query?: string | null
   results?: unknown
   insights?: string[]

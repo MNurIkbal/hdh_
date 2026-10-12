@@ -12,22 +12,22 @@ export default function PengaturanPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
-
+    <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-[#070D18] dark:text-slate-100">
       <AdminSidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="lg:pl-[270px]">
-
+      <div className="lg:pl-[275px] flex flex-col min-h-screen">
         <AdminNavbar
-          onMenuClick={() =>
-            setSidebarOpen(true)
-          }
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Pengaturan Sistem"
+          subtitle="Konfigurasi parameter dan aplikasi HDH"
         />
 
-        <PengaturanForm  />
+        <main className="flex-1">
+          <PengaturanForm />
+        </main>
 
         <AdminFooter />
       </div>

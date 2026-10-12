@@ -7,8 +7,11 @@ import {
   useEffect,
   type CSSProperties,
 } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  ArrowLeft,
   ArrowRight,
   Check,
   Eye,
@@ -17,9 +20,18 @@ import {
   Lock,
   Mail,
   Scale,
+  ShieldCheck,
+  Sparkles,
+  AlertCircle,
+  HelpCircle,
+  CheckCircle2,
+  FileText,
+  Shield,
+  Palette,
 } from "lucide-react";
 
 import { LoginHook, SessionHook } from "@/feature/web";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type Status = "idle" | "loading" | "success";
 
@@ -48,6 +60,7 @@ export default function LoginPage() {
   const [status, setStatus] = useState<Status>("idle");
 
   const [errors, setErrors] = useState<FormErrors>({});
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const [pos, setPos] = useState<CursorPos>({
     x: 50,
@@ -55,11 +68,9 @@ export default function LoginPage() {
   });
 
   const [checkingSession, setCheckingSession] = useState(true);
-
   const containerRef = useRef<HTMLDivElement>(null);
 
   const loginMutation = LoginHook();
-
   const sessionQuery = SessionHook();
 
   useEffect(() => {
@@ -77,11 +88,9 @@ export default function LoginPage() {
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = containerRef.current?.getBoundingClientRect();
-
     if (!rect) return;
 
     const x = ((e.clientX - rect.left) / rect.width) * 100;
-
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     setPos({ x, y });
@@ -89,25 +98,22 @@ export default function LoginPage() {
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
-
     const cleanEmail = email.trim();
 
     if (!cleanEmail) {
       newErrors.email = "Email wajib diisi";
     } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
       if (!emailRegex.test(cleanEmail)) {
         newErrors.email = "Format email tidak valid";
       }
     }
 
     if (!password) {
-      newErrors.password = "Password wajib diisi";
+      newErrors.password = "Kata sandi wajib diisi";
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -119,7 +125,6 @@ export default function LoginPage() {
     }
 
     setErrors({});
-
     const isValid = validateForm();
 
     if (!isValid) {
@@ -129,7 +134,6 @@ export default function LoginPage() {
 
     try {
       setStatus("loading");
-
       const cleanEmail = email.trim();
 
       await loginMutation.mutateAsync({
@@ -144,799 +148,522 @@ export default function LoginPage() {
       setTimeout(() => {
         router.replace("/admin/dokumen-hukum");
         router.refresh();
-      }, 500);
+      }, 600);
     } catch (error: any) {
       setStatus("idle");
 
       const message =
         error?.response?.data?.message ||
         error?.message ||
-        "Email atau password salah";
+        "Email atau kata sandi tidak valid";
 
       if (
         error?.response?.status === 401 ||
-        message === "Email atau password salah"
+        message.toLowerCase().includes("email") ||
+        message.toLowerCase().includes("password") ||
+        message.toLowerCase().includes("salah")
       ) {
         setErrors({
-          general: "Email atau password salah",
+          general: "Email atau kata sandi yang Anda masukkan salah.",
         });
-
         return;
       }
 
       setErrors({
-        general: "Terjadi kesalahan pada server. Silakan coba lagi.",
+        general:
+          "Terjadi kendala saat menghubungkan ke server. Silakan coba beberapa saat lagi.",
       });
     }
   };
 
   if (checkingSession || sessionQuery.isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 size={28} className="animate-spin text-[#1358A8]" />
-
-          <p className="text-sm text-gray-500">Memeriksa sesi pengguna...</p>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#071326]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(19,88,168,0.25)_0%,transparent_70%)]" />
+        <div className="relative z-10 flex flex-col items-center gap-4 text-center">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md shadow-2xl">
+            <Loader2 size={32} className="animate-spin text-[#60A5FA]" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-sm font-semibold tracking-wide text-white">Memverifikasi Sesi Autentikasi</p>
+            <p className="text-xs text-slate-400">Menghubungkan ke Portal HDH BIN...</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  const BLUE = "#1358A8";
-  const BLUE_DARK = "#0D3B73";
-  const TEXT = "#172033";
-  const MUTED = "#6B7280";
-  const GOLD = "#C9A15A";
-  const BORDER = "#E5E7EB";
-  const ERROR = "#DC2626";
-
-  const fieldWrap = (focused: boolean, hasError: boolean): CSSProperties => ({
-    borderColor: hasError ? ERROR : focused ? BLUE : BORDER,
-
-    boxShadow: hasError
-      ? "0 0 0 4px rgba(220,38,38,0.08)"
-      : focused
-        ? "0 0 0 4px rgba(19,88,168,0.08)"
-        : "none",
-
-    background: "#FFFFFF",
-  });
-
   return (
     <div
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-white px-5 py-10 sm:px-8"
+      className="relative flex min-h-screen w-full items-center justify-center overflow-x-hidden bg-slate-100 text-slate-900 transition-colors duration-300 selection:bg-[#1358A8] selection:text-white dark:bg-[#0A111F] dark:text-slate-100"
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-
-        .jdih-sans {
-          font-family: 'Inter', sans-serif;
-        }
-
-        .jdih-heading {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        @keyframes jdih-fade-up {
-          from {
-            opacity: 0;
-            transform: translateY(18px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes jdih-float {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-
-          50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes jdih-float-small {
-          0%, 100% {
-            transform: translateY(0px);
-          }
-
-          50% {
-            transform: translateY(-6px);
-          }
-        }
-
-        @keyframes jdih-pop {
+        @keyframes shine-sweep {
           0% {
-            transform: scale(0.7);
-            opacity: 0;
+            transform: translateX(-100%) skewX(-15deg);
           }
-
-          60% {
-            transform: scale(1.08);
-            opacity: 1;
-          }
-
           100% {
+            transform: translateX(200%) skewX(-15deg);
+          }
+        }
+
+        @keyframes pulse-subtle {
+          0%, 100% {
+            opacity: 0.55;
             transform: scale(1);
-            opacity: 1;
+          }
+          50% {
+            opacity: 0.85;
+            transform: scale(1.03);
           }
         }
 
-        .jdih-in {
-          opacity: 0;
-          animation:
-            jdih-fade-up
-            0.7s
-            cubic-bezier(0.16, 1, 0.3, 1)
-            forwards;
-        }
-
-        .jdih-float {
-          animation: jdih-float 5s ease-in-out infinite;
-        }
-
-        .jdih-float-small {
-          animation: jdih-float-small 4s ease-in-out infinite;
-        }
-
-        .jdih-input {
-          width: 100%;
-          border: none;
-          outline: none;
-          background: transparent;
-          color: #172033;
-          font-family: 'Inter', sans-serif;
-          font-size: 14px;
-        }
-
-        .jdih-input::placeholder {
-          color: #9CA3AF;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .jdih-in,
-          .jdih-float,
-          .jdih-float-small {
-            animation: none !important;
-            opacity: 1 !important;
-            transform: none !important;
+        @keyframes float-gentle {
+          0%, 100% {
+            transform: translateY(0px);
           }
+          50% {
+            transform: translateY(-8px);
+          }
+        }
+
+        .animate-shine-sweep {
+          animation: shine-sweep 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        .animate-pulse-subtle {
+          animation: pulse-subtle 7s ease-in-out infinite;
+        }
+
+        .animate-float-gentle {
+          animation: float-gentle 5s ease-in-out infinite;
         }
       `}</style>
 
-      <div
-        className="pointer-events-none absolute inset-0 overflow-hidden"
-        aria-hidden="true"
-      >
+      {/* =========================================================
+          BACKGROUND AMBIENCE & LIGHTING
+          ========================================================= */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        {/* Dynamic Interactive Cursor Glow */}
         <div
-          className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full"
+          className="absolute inset-0 opacity-30 transition-opacity duration-700 dark:opacity-40"
           style={{
-            background:
-              "radial-gradient(circle, rgba(19,88,168,0.07), transparent 68%)",
+            background: `radial-gradient(750px circle at ${pos.x}% ${pos.y}%, rgba(19, 88, 168, 0.18), transparent 70%)`,
           }}
         />
 
-        <div
-          className="absolute -bottom-48 -right-40 h-[600px] w-[600px] rounded-full"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(201,161,90,0.06), transparent 68%)",
-          }}
-        />
+        {/* Radiant spheres */}
+        <div className="animate-pulse-subtle absolute -top-40 -left-40 h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(19,88,168,0.25)_0%,transparent_70%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(13,59,115,0.45)_0%,transparent_70%)]" />
+        <div className="animate-pulse-subtle absolute -bottom-48 -right-40 h-[680px] w-[680px] rounded-full bg-[radial-gradient(circle,rgba(201,161,90,0.2)_0%,transparent_70%)] blur-3xl dark:bg-[radial-gradient(circle,rgba(201,161,90,0.18)_0%,transparent_70%)]" />
+        <div className="absolute top-1/3 right-1/4 h-[450px] w-[450px] rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.15)_0%,transparent_70%)] blur-3xl" />
 
+        {/* Subtle geometric grid pattern */}
         <div
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(
-              500px circle at ${pos.x}% ${pos.y}%,
-              rgba(19,88,168,0.035),
-              transparent 65%
-            )`,
-            transition: "background 0.35s ease-out",
-          }}
-        />
-
-        <div
-          className="absolute inset-0 opacity-[0.28]"
+          className="absolute inset-0 opacity-[0.035] dark:opacity-[0.045]"
           style={{
             backgroundImage: `
-              linear-gradient(rgba(19,88,168,0.035) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(19,88,168,0.035) 1px, transparent 1px)
+              linear-gradient(rgba(100, 116, 139, 0.4) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(100, 116, 139, 0.4) 1px, transparent 1px)
             `,
-            backgroundSize: "48px 48px",
+            backgroundSize: "60px 60px",
           }}
         />
+
+        {/* Subtle vignette border */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_50%,rgba(15,23,42,0.08)_100%)] dark:bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(10,17,31,0.75)_100%)]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-6xl">
-        <div className="grid items-center gap-16 lg:grid-cols-[1fr_430px]">
-          <div className="hidden lg:block">
-            <div
-              className="jdih-in"
-              style={{
-                animationDelay: "0.05s",
-              }}
-            >
-              <div className="mb-8 flex items-center gap-4">
-                <div
-                  className="flex h-14 w-14 items-center justify-center rounded-2xl"
-                  style={{
-                    background: BLUE,
-                    boxShadow: "0 12px 30px rgba(19,88,168,0.18)",
-                  }}
-                >
-                  <Scale size={28} color="white" strokeWidth={1.8} />
+      {/* =========================================================
+          MAIN CONTAINER
+          ========================================================= */}
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Top Floating Bar */}
+        <div className="mb-6 flex items-center justify-end">
+          <div className="flex items-center gap-2.5">
+            <span className="hidden text-xs font-medium text-slate-500 sm:inline dark:text-slate-400">Mode Tema</span>
+            <ThemeToggle variant="outline" size="sm" showDropdown={true} />
+          </div>
+        </div>
+
+        {/* Card Grid Layout */}
+        <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white/90 shadow-[0_25px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.02] dark:shadow-[0_30px_100px_rgba(0,0,0,0.6)] lg:grid lg:grid-cols-12">
+          <div className="relative flex flex-col justify-between overflow-hidden border-b border-slate-200/80 p-8 sm:p-12 dark:border-white/10 lg:col-span-7 lg:border-b-0 lg:border-r lg:p-14">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#0B2545] via-[#0D3B73] to-[#124D94] dark:from-[#0F223D]/95 dark:via-[#0A1628]/95 dark:to-[#070D18]" />
+            <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-[#1358A8]/30 blur-3xl dark:bg-[#1358A8]/20" />
+            <div className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[#C9A15A]/20 blur-3xl dark:bg-[#C9A15A]/10" />
+
+            <div className="relative z-10 text-white">
+              {/* Header Badge */}
+              <div className="inline-flex items-center gap-2.5 rounded-full border border-[#C9A15A]/40 bg-gradient-to-r from-[#C9A15A]/20 to-transparent px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#F3E2B8] shadow-sm">
+                <Sparkles size={13} className="text-[#C9A15A]" />
+                <span>Portal Resmi HDH BIN</span>
+              </div>
+
+              {/* Logo & Identity */}
+              <div className="mt-8 flex items-center gap-5">
+                <div className="relative flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-[#C9A15A]/40 bg-gradient-to-br from-[#0F2D54] to-[#08172C] p-3 shadow-[0_12px_32px_rgba(19,88,168,0.35)]">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-[#C9A15A]/15 via-transparent to-white/10 opacity-80" />
+                  <Image
+                    src="/images/log.png"
+                    alt="Logo BIN"
+                    width={64}
+                    height={64}
+                    priority
+                    className="relative z-10 h-full w-full object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]"
+                  />
                 </div>
 
                 <div>
-                  <div
-                    className="jdih-heading text-[18px] font-extrabold tracking-tight"
-                    style={{
-                      color: BLUE_DARK,
-                    }}
-                  >
-                    HARMONISASI DOKUMENTASI HUKUM
-                  </div>
-
-                  <div
-                    className="jdih-sans text-[11px] font-medium uppercase tracking-[0.14em]"
-                    style={{
-                      color: MUTED,
-                    }}
-                  >
+                  <h2 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">
                     HDH
-                  </div>
+                  </h2>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E0C084]">
+                    Badan Intelijen Negara
+                  </p>
+                  <p className="mt-1 text-xs text-slate-300">
+                    Harmonisasi Dokumentasi & Informasi Hukum
+                  </p>
                 </div>
               </div>
 
-              <h2
-                className="jdih-heading max-w-xl text-4xl font-extrabold leading-[1.18] tracking-tight xl:text-5xl"
-                style={{
-                  color: TEXT,
-                }}
-              >
-                Harmonisasi
-                <br />
-                <span style={{ color: BLUE }}>Dokumentasi Hukum</span>
-              </h2>
-
-              <p
-                className="jdih-sans mt-6 max-w-lg text-[15px] leading-7"
-                style={{
-                  color: MUTED,
-                }}
-              >
-                Akses dan kelola dokumentasi serta informasi hukum secara
-                terintegrasi melalui Portal HDH. Temukan produk hukum,
-                peraturan, keputusan, dan berbagai dokumen hukum dalam satu
-                sistem.
-              </p>
-
-              <div className="relative mt-10 h-[300px] w-full max-w-[590px]">
-                <div
-                  className="absolute left-1/2 top-1/2 h-[270px] w-[270px] -translate-x-1/2 -translate-y-1/2 rounded-full"
-                  style={{
-                    background:
-                      "radial-gradient(circle, rgba(234,242,255,0.95), rgba(234,242,255,0.35) 55%, transparent 72%)",
-                  }}
-                />
-
-                <div
-                  className="absolute left-[18%] top-[12%] h-3 w-3 rounded-full"
-                  style={{
-                    background: GOLD,
-                    opacity: 0.65,
-                  }}
-                />
-
-                <div
-                  className="absolute right-[17%] top-[23%] h-2 w-2 rounded-full"
-                  style={{
-                    background: BLUE,
-                    opacity: 0.45,
-                  }}
-                />
-
-                <div
-                  className="absolute bottom-[18%] left-[27%] h-2 w-2 rounded-full"
-                  style={{
-                    background: GOLD,
-                    opacity: 0.5,
-                  }}
-                />
-
-                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <div className="jdih-float">
-                    <div className="jdih-archive relative h-[230px] w-[330px]">
-                      <div className="jdih-archive-glow absolute left-1/2 top-1/2 h-[210px] w-[210px] -translate-x-1/2 -translate-y-1/2 rounded-full" />
-
-                      <div className="jdih-orbit-line absolute left-1/2 top-1/2 h-[190px] w-[270px] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border border-[#1358A8]/10" />
-
-                      <div className="jdih-dot absolute left-[25px] top-[72px] h-2 w-2 rounded-full bg-[#C9A15A]" />
-
-                      <div className="jdih-dot jdih-dot-delay absolute right-[28px] top-[45px] h-1.5 w-1.5 rounded-full bg-[#1358A8]" />
-
-                      <div className="jdih-dot absolute bottom-[48px] left-[54px] h-1.5 w-1.5 rounded-full bg-[#1358A8]" />
-
-                      <div className="jdih-dot jdih-dot-delay absolute bottom-[38px] right-[62px] h-2 w-2 rounded-full bg-[#C9A15A]" />
-
-                      <div className="jdih-document-main absolute left-1/2 top-[22px] h-[150px] w-[116px] -translate-x-1/2">
-                        <div className="absolute inset-0 translate-x-2 translate-y-2 rounded-[10px] border border-[#DCE5F0] bg-[#F4F7FB]" />
-
-                        <div className="absolute inset-0 translate-x-1 translate-y-1 rounded-[10px] border border-[#D5E0EC] bg-white" />
-
-                        <div className="relative h-full rounded-[10px] border border-[#D8E1EC] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.10)]">
-                          <div className="absolute left-1/2 top-[17px] flex h-11 w-11 -translate-x-1/2 items-center justify-center rounded-full border border-[#D8E4F2] bg-[#F4F8FD]">
-                            <div className="relative h-6 w-6">
-                              <div className="absolute left-1/2 top-0 h-5 w-[3px] -translate-x-1/2 rounded-full bg-[#1358A8]" />
-
-                              <div className="absolute left-[2px] top-[6px] h-[3px] w-5 rounded-full bg-[#1358A8]" />
-
-                              <div className="absolute left-[3px] top-[8px] h-3 w-[5px] rounded-b-full border-b-2 border-l-2 border-r-2 border-[#1358A8]" />
-
-                              <div className="absolute right-[3px] top-[8px] h-3 w-[5px] rounded-b-full border-b-2 border-l-2 border-r-2 border-[#1358A8]" />
-
-                              <div className="absolute left-1/2 top-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#C9A15A]" />
-                            </div>
-                          </div>
-
-                          <div className="absolute left-[16px] right-[16px] top-[72px]">
-                            <div className="mb-2 h-1.5 w-[52px] rounded-full bg-[#1358A8]" />
-
-                            <div className="mb-2 h-1 w-full rounded-full bg-[#E5EAF1]" />
-
-                            <div className="mb-2 h-1 w-[82%] rounded-full bg-[#E5EAF1]" />
-
-                            <div className="h-1 w-[65%] rounded-full bg-[#E5EAF1]" />
-                          </div>
-
-                          <div className="absolute bottom-[14px] left-[16px] flex items-center gap-1.5">
-                            <div className="h-1.5 w-1.5 rounded-full bg-[#C9A15A]" />
-                            <div className="h-1 w-[35px] rounded-full bg-[#E5EAF1]" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="jdih-document-left absolute left-[27px] top-[92px] h-[94px] w-[74px] rotate-[-8deg]">
-                        <div className="relative h-full rounded-lg border border-[#DCE4EE] bg-white shadow-[0_12px_25px_rgba(15,23,42,0.08)]">
-                          <div className="absolute left-[11px] top-[13px] h-1.5 w-[31px] rounded-full bg-[#C9A15A]" />
-
-                          <div className="absolute left-[11px] top-[27px] h-1 w-[48px] rounded-full bg-[#E5EAF1]" />
-
-                          <div className="absolute left-[11px] top-[36px] h-1 w-[42px] rounded-full bg-[#E5EAF1]" />
-
-                          <div className="absolute left-[11px] top-[45px] h-1 w-[34px] rounded-full bg-[#E5EAF1]" />
-
-                          <div className="absolute bottom-[12px] left-[11px] h-4 w-4 rounded-md bg-[#F0F5FB]">
-                            <div className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1358A8]" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="jdih-document-right absolute right-[25px] top-[105px] h-[82px] w-[68px] rotate-[8deg]">
-                        <div className="relative h-full rounded-lg border border-[#DCE4EE] bg-white shadow-[0_12px_25px_rgba(15,23,42,0.08)]">
-                          <div className="absolute left-[10px] top-[12px] h-1.5 w-[27px] rounded-full bg-[#1358A8]" />
-
-                          <div className="absolute left-[10px] top-[26px] h-1 w-[45px] rounded-full bg-[#E5EAF1]" />
-
-                          <div className="absolute left-[10px] top-[35px] h-1 w-[39px] rounded-full bg-[#E5EAF1]" />
-
-                          <div className="absolute left-[10px] top-[44px] h-1 w-[29px] rounded-full bg-[#E5EAF1]" />
-
-                          <div className="absolute bottom-[10px] right-[10px] h-2 w-2 rounded-full bg-[#C9A15A]" />
-                        </div>
-                      </div>
-
-                      <div className="jdih-search absolute bottom-[25px] right-[76px] h-[58px] w-[58px]">
-                        <div className="absolute left-0 top-0 h-[38px] w-[38px] rounded-full border-[5px] border-[#1358A8] bg-white shadow-[0_8px_20px_rgba(19,88,168,0.14)]">
-                          <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C9A15A]" />
-                        </div>
-
-                        <div className="absolute left-[31px] top-[31px] h-[24px] w-[6px] rotate-[-45deg] rounded-full bg-[#1358A8]" />
-                      </div>
-
-                      <div className="absolute bottom-[8px] left-1/2 flex -translate-x-1/2 items-center gap-2">
-                        <div className="h-[4px] w-8 rounded-full bg-[#C9A15A]" />
-                        <div className="h-[4px] w-16 rounded-full bg-[#1358A8]" />
-                        <div className="h-[4px] w-8 rounded-full bg-[#C9A15A]" />
-                      </div>
-
-                      <div className="absolute left-[76px] top-[28px] text-[13px] text-[#C9A15A]">
-                        ✦
-                      </div>
-
-                      <div className="jdih-star absolute right-[76px] top-[71px] text-[10px] text-[#1358A8]">
-                        ✦
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              {/* Headline */}
+              <div className="mt-10 space-y-3">
+                <h1 className="text-3xl font-black leading-tight tracking-tight text-white sm:text-4xl lg:text-[40px]">
+                  Integrasi Informasi Hukum yang{" "}
+                  <span className="bg-gradient-to-r from-[#93C5FD] via-[#BFDBFE] to-[#F3E2B8] bg-clip-text text-transparent">
+                    Akurat & Andal
+                  </span>
+                </h1>
+                <p className="max-w-xl text-sm leading-relaxed text-slate-200/90 sm:text-base">
+                  Pusat layanan autentikasi terpadu untuk pengelola, penyusun regulasi, dan administrator dalam manajemen produk hukum nasional.
+                </p>
               </div>
 
-              <div className="mt-2 flex items-center gap-3">
-                <div
-                  className="h-px w-10"
-                  style={{
-                    background: GOLD,
-                  }}
-                />
+              {/* Feature Highlights Grid */}
+              <div className="mt-10 grid gap-4 sm:grid-cols-3">
+                <div className="group rounded-2xl border border-white/15 bg-white/[0.08] p-4.5 backdrop-blur-md transition-all duration-300 hover:border-[#93C5FD]/60 hover:bg-white/[0.12]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-blue-300/30 bg-blue-500/20 text-blue-200 shadow-inner">
+                    <Scale size={20} />
+                  </div>
+                  <h2 className="mt-3 text-xs font-bold uppercase tracking-wider text-white">
+                    Produk Hukum
+                  </h2>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+                    Peraturan, penetapan, dan keputusan terpusat.
+                  </p>
+                </div>
 
-                <span
-                  className="jdih-sans text-[10px] font-medium uppercase tracking-[0.14em]"
-                  style={{
-                    color: "#9CA3AF",
-                  }}
-                >
-                  Dokumentasi • Regulasi • Informasi Hukum
-                </span>
+                <div className="group rounded-2xl border border-white/15 bg-white/[0.08] p-4.5 backdrop-blur-md transition-all duration-300 hover:border-[#C9A15A]/60 hover:bg-white/[0.12]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300/30 bg-amber-500/20 text-[#F3E2B8] shadow-inner">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <h2 className="mt-3 text-xs font-bold uppercase tracking-wider text-white">
+                    Tervalidasi
+                  </h2>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+                    Otentikasi aman berbasis izin akses khusus.
+                  </p>
+                </div>
+
+                <div className="group rounded-2xl border border-white/15 bg-white/[0.08] p-4.5 backdrop-blur-md transition-all duration-300 hover:border-emerald-300/60 hover:bg-white/[0.12]">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300/30 bg-emerald-500/20 text-emerald-200 shadow-inner">
+                    <FileText size={20} />
+                  </div>
+                  <h2 className="mt-3 text-xs font-bold uppercase tracking-wider text-white">
+                    Harmonisasi
+                  </h2>
+                  <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+                    Penyelarasan dokumentasi secara terpadu.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="w-full">
-            <div
-              className="jdih-in rounded-[26px] border bg-white p-7 shadow-[0_25px_70px_rgba(15,23,42,0.08)] sm:p-9"
-              style={{
-                borderColor: "#E6EAF0",
-                animationDelay: "0.12s",
-              }}
-            >
-              <div className="mb-7 flex flex-col items-center lg:hidden">
-                <div
-                  className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl"
-                  style={{
-                    background: BLUE,
-                    boxShadow: "0 10px 28px rgba(19,88,168,0.2)",
-                  }}
-                >
-                  <Scale size={27} color="white" strokeWidth={1.8} />
-                </div>
+          {/* =========================================================
+              RIGHT COLUMN: SLEEK AUTH FORM
+              ========================================================= */}
+          <div className="relative flex flex-col justify-center bg-white/95 p-8 sm:p-12 transition-colors duration-300 dark:bg-[#0C1527]/95 lg:col-span-5 lg:p-12">
+            {/* Top ambient glow inside form */}
+            <div className="pointer-events-none absolute top-0 right-0 h-72 w-72 rounded-full bg-[#1358A8]/10 blur-2xl dark:bg-[#1358A8]/15" />
 
-                <div
-                  className="jdih-heading text-lg font-extrabold"
-                  style={{
-                    color: BLUE_DARK,
-                  }}
-                >
-                  HARMONISASI DOKUMENTASI HUKUM
-                </div>
-
-                <div
-                  className="jdih-sans mt-1 text-center text-[10px] font-medium uppercase tracking-[0.12em]"
-                  style={{
-                    color: MUTED,
-                  }}
-                >
-                  HDH
-                </div>
-              </div>
-
+            <div className="relative z-10">
+              {/* Form Title & Subtitle */}
               <div className="mb-8">
-                <div
-                  className="jdih-sans mb-2 text-xs font-semibold uppercase tracking-[0.14em]"
-                  style={{
-                    color: BLUE,
-                  }}
-                >
-                  Portal HDH
+                <div className="mb-2 inline-flex items-center gap-2 rounded-md border border-blue-500/20 bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+                  <span>Autentikasi Petugas</span>
                 </div>
-
-                <h1
-                  className="jdih-heading text-[28px] font-extrabold tracking-tight"
-                  style={{
-                    color: TEXT,
-                  }}
-                >
-                  Selamat Datang
-                </h1>
-
-                <p
-                  className="jdih-sans mt-2 text-[13px] leading-6"
-                  style={{
-                    color: MUTED,
-                  }}
-                >
-                  Masuk untuk mengakses layanan dan dokumentasi informasi hukum.
+                <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-white">
+                  Masuk ke Akun
+                </h2>
+                <p className="mt-2 text-xs leading-relaxed text-slate-500 sm:text-sm dark:text-slate-400">
+                  Silakan masukkan kredensial terdaftar untuk mengakses dashboard administrasi.
                 </p>
               </div>
 
+              {/* General Error Banner */}
               {errors.general && (
-                <div
-                  className="mb-5 flex items-center gap-3 rounded-xl border px-4 py-3"
-                  style={{
-                    borderColor: "#FECACA",
-                    background: "#FEF2F2",
-                  }}
-                >
-                  <div
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full"
-                    style={{
-                      background: "#FEE2E2",
-                      color: ERROR,
-                    }}
-                  >
-                    !
+                <div className="mb-6 flex items-start gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-rose-800 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 dark:text-rose-200">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0 text-rose-500 dark:text-rose-400" />
+                  <div className="text-xs leading-relaxed">
+                    <p className="font-semibold text-rose-700 dark:text-rose-300">Autentikasi Gagal</p>
+                    <p className="mt-0.5 text-rose-600 dark:text-rose-200/90">{errors.general}</p>
                   </div>
-
-                  <p
-                    className="jdih-sans text-[13px] font-medium"
-                    style={{
-                      color: ERROR,
-                    }}
-                  >
-                    {errors.general}
-                  </p>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} noValidate>
-                <div
-                  className="jdih-in mb-5"
-                  style={{
-                    animationDelay: "0.22s",
-                  }}
-                >
-                  <label
-                    className="jdih-sans mb-2 block text-xs font-semibold"
-                    style={{
-                      color: TEXT,
-                    }}
-                  >
-                    Alamat Email
-                  </label>
+              {/* Form */}
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                {/* Email Field */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label
+                      htmlFor="login-email"
+                      className="text-xs font-semibold tracking-wide text-slate-700 dark:text-slate-200"
+                    >
+                      Alamat Email
+                    </label>
+                    {errors.email && (
+                      <span className="text-[11px] font-medium text-rose-500 dark:text-rose-400">
+                        {errors.email}
+                      </span>
+                    )}
+                  </div>
 
                   <div
-                    className="flex h-[52px] items-center gap-3 rounded-xl border px-4 transition-all duration-200"
-                    style={{
-                      ...fieldWrap(emailFocused, !!errors.email),
-                    }}
+                    className={[
+                      "group relative flex h-13 items-center rounded-xl border px-4 transition-all duration-200 backdrop-blur-md",
+                      errors.email
+                        ? "border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/40"
+                        : emailFocused
+                        ? "border-[#1358A8] shadow-[0_0_20px_rgba(19,88,168,0.2)] ring-2 ring-[#1358A8]/30 bg-white dark:bg-white/[0.06]"
+                        : "border-slate-200 bg-slate-50/80 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-white/20 dark:hover:bg-white/[0.05]",
+                    ].join(" ")}
                   >
                     <Mail
-                      size={17}
-                      strokeWidth={1.8}
-                      color={
-                        errors.email ? ERROR : emailFocused ? BLUE : "#9CA3AF"
-                      }
+                      size={18}
+                      className={[
+                        "shrink-0 transition-colors duration-200",
+                        errors.email
+                          ? "text-rose-500"
+                          : emailFocused
+                          ? "text-[#1358A8] dark:text-[#60A5FA]"
+                          : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300",
+                      ].join(" ")}
                     />
 
                     <input
+                      id="login-email"
                       type="email"
-                      className="jdih-input"
                       value={email}
                       onChange={(e) => {
                         setEmail(e.target.value);
-
                         if (errors.email) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            email: undefined,
-                          }));
+                          setErrors((prev) => ({ ...prev, email: undefined }));
                         }
-
                         if (errors.general) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            general: undefined,
-                          }));
+                          setErrors((prev) => ({ ...prev, general: undefined }));
                         }
                       }}
                       onFocus={() => setEmailFocused(true)}
                       onBlur={() => setEmailFocused(false)}
-                      placeholder="Masukkan alamat email"
+                      placeholder="admin@hdh.go.id"
                       autoComplete="email"
                       disabled={loginMutation.isPending}
+                      className="ml-3 w-full bg-transparent text-sm font-medium text-slate-800 placeholder-slate-400 outline-none dark:text-white dark:placeholder-slate-500"
                     />
                   </div>
-
-                  {errors.email && (
-                    <p
-                      className="jdih-sans mt-2 text-xs"
-                      style={{
-                        color: ERROR,
-                      }}
-                    >
-                      {errors.email}
-                    </p>
-                  )}
                 </div>
 
-                <div
-                  className="jdih-in mb-4"
-                  style={{
-                    animationDelay: "0.27s",
-                  }}
-                >
-                  <label
-                    className="jdih-sans mb-2 block text-xs font-semibold"
-                    style={{
-                      color: TEXT,
-                    }}
-                  >
-                    Kata Sandi
-                  </label>
+                {/* Password Field */}
+                <div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label
+                      htmlFor="login-password"
+                      className="text-xs font-semibold tracking-wide text-slate-700 dark:text-slate-200"
+                    >
+                      Kata Sandi
+                    </label>
+                    {errors.password && (
+                      <span className="text-[11px] font-medium text-rose-500 dark:text-rose-400">
+                        {errors.password}
+                      </span>
+                    )}
+                  </div>
 
                   <div
-                    className="flex h-[52px] items-center gap-3 rounded-xl border px-4 transition-all duration-200"
-                    style={{
-                      ...fieldWrap(passwordFocused, !!errors.password),
-                    }}
+                    className={[
+                      "group relative flex h-13 items-center rounded-xl border px-4 transition-all duration-200 backdrop-blur-md",
+                      errors.password
+                        ? "border-rose-500/60 shadow-[0_0_15px_rgba(244,63,94,0.15)] ring-1 ring-rose-500/40"
+                        : passwordFocused
+                        ? "border-[#1358A8] shadow-[0_0_20px_rgba(19,88,168,0.2)] ring-2 ring-[#1358A8]/30 bg-white dark:bg-white/[0.06]"
+                        : "border-slate-200 bg-slate-50/80 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-white/[0.04] dark:hover:border-white/20 dark:hover:bg-white/[0.05]",
+                    ].join(" ")}
                   >
                     <Lock
-                      size={17}
-                      strokeWidth={1.8}
-                      color={
+                      size={18}
+                      className={[
+                        "shrink-0 transition-colors duration-200",
                         errors.password
-                          ? ERROR
+                          ? "text-rose-500"
                           : passwordFocused
-                            ? BLUE
-                            : "#9CA3AF"
-                      }
+                          ? "text-[#1358A8] dark:text-[#60A5FA]"
+                          : "text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300",
+                      ].join(" ")}
                     />
 
                     <input
+                      id="login-password"
                       type={showPassword ? "text" : "password"}
-                      className="jdih-input"
                       value={password}
                       onChange={(e) => {
                         setPassword(e.target.value);
-
                         if (errors.password) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            password: undefined,
-                          }));
+                          setErrors((prev) => ({ ...prev, password: undefined }));
                         }
-
                         if (errors.general) {
-                          setErrors((prev) => ({
-                            ...prev,
-                            general: undefined,
-                          }));
+                          setErrors((prev) => ({ ...prev, general: undefined }));
                         }
                       }}
                       onFocus={() => setPasswordFocused(true)}
                       onBlur={() => setPasswordFocused(false)}
-                      placeholder="Masukkan kata sandi"
+                      placeholder="••••••••"
                       autoComplete="current-password"
                       disabled={loginMutation.isPending}
+                      className="ml-3 w-full bg-transparent text-sm font-medium tracking-wide text-slate-800 placeholder-slate-400 outline-none dark:text-white dark:placeholder-slate-500"
                     />
 
                     <button
                       type="button"
                       disabled={loginMutation.isPending}
-                      onClick={() => setShowPassword((s) => !s)}
-                      className="shrink-0 border-0 bg-transparent p-1"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      tabIndex={-1}
+                      aria-label={showPassword ? "Sembunyikan sandi" : "Tampilkan sandi"}
+                      className="shrink-0 p-1 text-slate-400 transition-colors duration-150 hover:text-slate-700 dark:hover:text-white"
                     >
-                      {showPassword ? (
-                        <EyeOff size={17} color="#9CA3AF" />
-                      ) : (
-                        <Eye size={17} color="#9CA3AF" />
-                      )}
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
-
-                  {errors.password && (
-                    <p
-                      className="jdih-sans mt-2 text-xs"
-                      style={{
-                        color: ERROR,
-                      }}
-                    >
-                      {errors.password}
-                    </p>
-                  )}
                 </div>
 
                 <button
                   type="submit"
                   disabled={loginMutation.isPending || status === "success"}
-                  className="jdih-sans group jdih-in relative flex h-[52px] w-full items-center justify-center gap-2 overflow-hidden rounded-xl border-0 text-sm font-semibold text-white transition-all duration-300"
-                  style={{
-                    background:
-                      status === "success"
-                        ? "#16A37A"
-                        : `linear-gradient(
-                            100deg,
-                            ${BLUE_DARK},
-                            ${BLUE}
-                          )`,
-
-                    boxShadow:
-                      status === "idle"
-                        ? "0 10px 24px rgba(19,88,168,0.18)"
-                        : "none",
-
-                    cursor:
-                      loginMutation.isPending || status === "success"
-                        ? "default"
-                        : "pointer",
-
-                    animationDelay: "0.37s",
-                  }}
+                  className={[
+                    "relative mt-2 flex h-13 w-full items-center justify-center overflow-hidden rounded-xl text-sm font-bold text-white transition-all duration-300 shadow-xl",
+                    status === "success"
+                      ? "bg-gradient-to-r from-emerald-600 to-teal-500 shadow-emerald-500/30"
+                      : "bg-gradient-to-r from-[#0D3B73] via-[#1358A8] to-[#1E6BCE] hover:from-[#0B3363] hover:via-[#114E96] hover:to-[#1A5FB7] hover:shadow-[0_10px_30px_rgba(19,88,168,0.4)] active:scale-[0.99]",
+                    loginMutation.isPending || status === "success"
+                      ? "cursor-default"
+                      : "cursor-pointer",
+                  ].join(" ")}
                 >
+                  {/* Sheen animation layer */}
                   {status === "idle" && (
-                    <>
-                      Masuk ke Portal
-                      <ArrowRight
-                        size={16}
-                        className="transition-transform duration-300 group-hover:translate-x-1"
-                      />
-                    </>
+                    <div className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-shine-sweep" />
+                  )}
+
+                  {status === "idle" && (
+                    <span className="flex items-center gap-2">
+                      <span>Masuk ke Portal</span>
+                      <ArrowRight size={17} className="transition-transform duration-200 group-hover:translate-x-1" />
+                    </span>
                   )}
 
                   {status === "loading" && (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Memproses...
-                    </>
+                    <span className="flex items-center gap-2.5">
+                      <Loader2 size={18} className="animate-spin text-white" />
+                      <span>Mengautentikasi...</span>
+                    </span>
                   )}
 
                   {status === "success" && (
-                    <span
-                      className="flex items-center gap-2"
-                      style={{
-                        animation: "jdih-pop 0.4s ease",
-                      }}
-                    >
-                      <Check size={17} strokeWidth={3} />
-                      Berhasil
+                    <span className="flex items-center gap-2 text-white animate-in zoom-in-95 duration-200">
+                      <CheckCircle2 size={19} className="text-white" strokeWidth={2.5} />
+                      <span>Berhasil! Mengalihkan...</span>
                     </span>
                   )}
                 </button>
               </form>
 
-              <div
-                className="jdih-in mt-7 border-t pt-6 text-center"
-                style={{
-                  borderColor: "#EEF0F3",
-                  animationDelay: "0.42s",
-                }}
-              >
-                <p
-                  className="jdih-sans text-[11px] leading-5"
-                  style={{
-                    color: "#9CA3AF",
-                  }}
-                >
-                  Akses terbatas untuk pengguna yang telah terdaftar pada sistem
-                  HDH.
+
+              {/* Disclaimer & Footer */}
+              <div className="mt-6 border-t border-slate-200/80 pt-5 text-center dark:border-white/10">
+                <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                  Akses ini khusus diperuntukkan bagi pegawai dan pengelola yang berwenang. Segala aktivitas pencatatan dan akses diawasi sesuai ketentuan hukum yang berlaku.
                 </p>
 
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  <div
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{
-                      background: GOLD,
-                    }}
-                  />
-
-                  <span
-                    className="jdih-sans text-[10px] font-medium uppercase tracking-[0.1em]"
-                    style={{
-                      color: "#9CA3AF",
-                    }}
-                  >
-                    Jaringan Dokumentasi & Informasi Hukum
-                  </span>
-
-                  <div
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{
-                      background: BLUE,
-                    }}
-                  />
+                <div className="mt-3 flex items-center justify-center gap-2 text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  <span>Sistem HDH</span>
+                  <span>&bull;</span>
+                  <span className="font-semibold text-[#1358A8] dark:text-[#E0C084]">Badan Intelijen Negara</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* =========================================================
+          HELP MODAL (FOR FORGOT PASSWORD / ACCESS)
+          ========================================================= */}
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setShowHelpModal(false)}
+          />
+
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl backdrop-blur-xl animate-in zoom-in-95 duration-200 dark:border-white/15 dark:bg-[#0C172B]">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4 dark:border-white/10">
+              <div className="flex items-center gap-2.5 text-slate-900 dark:text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-500/30 bg-amber-50 text-[#C9A15A] dark:border-amber-400/20 dark:bg-amber-500/10">
+                  <HelpCircle size={20} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Bantuan Akses Akun</h3>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Portal HDH BIN</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowHelpModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/10 dark:hover:text-white"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+              <p>
+                Untuk alasan keamanan institusional, pembuatan akun baru serta reset kata sandi dikelola secara tersentralisasi oleh administrator sistem.
+              </p>
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50 p-3.5 text-slate-700 dark:border-white/5 dark:bg-white/[0.03] dark:text-slate-300">
+                <p className="font-semibold text-slate-900 dark:text-white">Langkah Pemulihan Akses:</p>
+                <ol className="mt-2 list-inside list-decimal space-y-1 text-[11px] text-slate-600 dark:text-slate-400">
+                  <li>Hubungi Unit Pengelola TIK / Hukum BIN terkait.</li>
+                  <li>Sertakan alamat email dinas resmi yang terdaftar.</li>
+                  <li>Petugas administrator akan melakukan verifikasi dan pembaruan kredensial Anda.</li>
+                </ol>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowHelpModal(false)}
+                className="rounded-xl bg-gradient-to-r from-[#1358A8] to-[#1E6BCE] px-4 py-2 text-xs font-semibold text-white shadow-md hover:from-[#114E96] hover:to-[#1A5FB7]"
+              >
+                Saya Mengerti
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

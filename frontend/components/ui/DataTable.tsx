@@ -178,12 +178,12 @@ export default function DataTable<T>({
     <div className="w-full">
       <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <h5 className="text-3xl font-bold tracking-[-0.035em]">
+          <h5 className="text-3xl font-bold tracking-[-0.035em] text-slate-900 dark:text-slate-100">
             {title}
           </h5>
 
           {description && (
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 ">
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
               {description}
             </p>
           )}
@@ -213,6 +213,10 @@ export default function DataTable<T>({
                 transition-all
                 hover:border-slate-300
                 hover:bg-slate-50
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:text-slate-300
+                dark:hover:bg-slate-700
                 disabled:pointer-events-none
                 disabled:opacity-50
               "
@@ -245,28 +249,34 @@ export default function DataTable<T>({
                 cursor-pointer
                 gap-2
                 rounded-xl
-                bg-[#1358A8]
+                border
+                border-[#C9A15A]/40
+                bg-gradient-to-r
+                from-[#0D3B73]
+                to-[#1358A8]
                 px-4
                 text-xs
                 font-semibold
                 text-white
-                shadow-[0_8px_20px_rgba(19,88,168,0.20)]
+                shadow-[0_8px_20px_rgba(19,88,168,0.25)]
                 transition-all
                 hover:-translate-y-0.5
-                hover:bg-[#0D3B73]
+                hover:border-[#C9A15A]/70
+                hover:shadow-[0_10px_25px_rgba(19,88,168,0.35)]
+                active:translate-y-0
               "
             >
-              <Plus size={16} />
+              <Plus size={16} className="text-[#F3E2B8]" />
               {addButtonText}
             </button>
           )}
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_20px_rgba(15,23,42,0.04)]">
-        <div className="flex flex-col gap-4 border-b border-slate-100 bg-white px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+      <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white/95 shadow-[0_10px_35px_rgba(15,23,42,0.03)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0A111F]/90 dark:shadow-[0_15px_40px_rgba(0,0,0,0.5)]">
+        <div className="flex flex-col gap-4 border-b border-slate-100 bg-white/50 px-5 py-4 dark:border-white/10 dark:bg-white/[0.02] lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Tampilkan</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">Tampilkan</span>
 
             <div className="relative">
               <select
@@ -290,6 +300,10 @@ export default function DataTable<T>({
                   focus:border-blue-400
                   focus:ring-4
                   focus:ring-blue-50
+                  dark:border-slate-700
+                  dark:bg-slate-800
+                  dark:text-slate-200
+                  dark:focus:border-blue-500
                 "
               >
                 {pageSizeOptions.map((pageSize) => (
@@ -312,7 +326,7 @@ export default function DataTable<T>({
               />
             </div>
 
-            <span className="text-xs text-slate-500">data</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">data</span>
           </div>
 
           <div className="relative w-full sm:w-[320px]">
@@ -350,6 +364,12 @@ export default function DataTable<T>({
                 focus:bg-white
                 focus:ring-4
                 focus:ring-blue-50
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:text-slate-100
+                dark:placeholder:text-slate-500
+                dark:focus:bg-slate-800
+                dark:focus:border-blue-500
               "
             />
           </div>
@@ -358,8 +378,8 @@ export default function DataTable<T>({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="w-[70px] px-5 py-4 text-left text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">
+              <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/60">
+                <th className="w-[70px] px-5 py-4 text-left text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
                   No
                 </th>
 
@@ -389,6 +409,7 @@ export default function DataTable<T>({
                           uppercase
                           tracking-[0.06em]
                           text-slate-500
+                          dark:text-slate-400
                           ${column.sortable ? "cursor-pointer select-none" : ""}
                         `}
                       onClick={() => handleSort(key, column.sortable)}
@@ -411,10 +432,10 @@ export default function DataTable<T>({
                                 transition-transform
                                 ${
                                   isSorted && isDesc
-                                    ? "rotate-180 text-[#1358A8]"
+                                    ? "rotate-180 text-[#1358A8] dark:text-blue-400"
                                     : isSorted
-                                      ? "text-[#1358A8]"
-                                      : "text-slate-300"
+                                      ? "text-[#1358A8] dark:text-blue-400"
+                                      : "text-slate-300 dark:text-slate-600"
                                 }
                               `}
                           />
@@ -425,20 +446,20 @@ export default function DataTable<T>({
                 })}
 
                 {actions && (
-                  <th className="w-[140px] px-5 py-4 text-right text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500">
+                  <th className="w-[140px] px-5 py-4 text-right text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500 dark:text-slate-400">
                     Aksi
                   </th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {loading &&
                 Array.from({
                   length: Math.min(size, 5),
                 }).map((_, index) => (
                   <tr key={`loading-row-${index}`}>
                     <td colSpan={columnCount} className="px-5 py-5">
-                      <div className="h-5 animate-pulse rounded-lg bg-slate-100" />
+                      <div className="h-5 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
                     </td>
                   </tr>
                 ))}
@@ -447,15 +468,15 @@ export default function DataTable<T>({
                 <tr>
                   <td colSpan={columnCount} className="px-5 py-20 text-center">
                     <div className="mx-auto max-w-sm">
-                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-400">
+                      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400">
                         <Search size={20} />
                       </div>
 
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                         {search ? "Data tidak ditemukan" : emptyMessage}
                       </p>
 
-                      <p className="mt-1.5 text-xs leading-5 text-slate-400">
+                      <p className="mt-1.5 text-xs leading-5 text-slate-400 dark:text-slate-500">
                         {search
                           ? "Coba gunakan kata pencarian yang berbeda."
                           : "Belum terdapat data yang dapat ditampilkan."}
@@ -481,9 +502,9 @@ export default function DataTable<T>({
                   return (
                     <tr
                       key={rowKey}
-                      className="group transition-colors hover:bg-slate-50/70"
+                      className="group transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/50"
                     >
-                      <td className="px-5 py-4.5 text-sm font-medium text-slate-400">
+                      <td className="px-5 py-4.5 text-sm font-medium text-slate-400 dark:text-slate-500">
                         {startRecord + index}
                       </td>
 
@@ -501,6 +522,7 @@ export default function DataTable<T>({
                   text-${column.align ?? "left"}
                   text-sm
                   text-slate-600
+                  dark:text-slate-300
                 `}
                           >
                             {column.render
@@ -537,6 +559,10 @@ export default function DataTable<T>({
       hover:border-emerald-200
       hover:bg-emerald-100
       hover:text-emerald-700
+      dark:border-emerald-900/50
+      dark:bg-emerald-950/40
+      dark:text-emerald-400
+      dark:hover:bg-emerald-900/60
       active:scale-95
     "
                               >
@@ -569,6 +595,10 @@ export default function DataTable<T>({
       hover:border-red-200
       hover:bg-red-100
       hover:text-red-600
+      dark:border-red-900/50
+      dark:bg-red-950/40
+      dark:text-red-400
+      dark:hover:bg-red-900/60
       active:scale-95
     "
                               >
@@ -586,20 +616,20 @@ export default function DataTable<T>({
           </table>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-          <p className="text-xs text-slate-500">
+        <div className="flex flex-col gap-4 border-t border-slate-100 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {totalElements > 0 ? (
               <>
                 Menampilkan{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
                   {startRecord}
                 </span>{" "}
                 -{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
                   {endRecord}
                 </span>{" "}
                 dari{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="font-semibold text-slate-700 dark:text-slate-200">
                   {totalElements}
                 </span>{" "}
                 data
@@ -627,6 +657,10 @@ export default function DataTable<T>({
                 transition
                 hover:bg-slate-50
                 hover:text-slate-700
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:text-slate-300
+                dark:hover:bg-slate-700
                 disabled:pointer-events-none
                 disabled:opacity-40
               "
@@ -651,6 +685,10 @@ export default function DataTable<T>({
                 transition
                 hover:bg-slate-50
                 hover:text-slate-700
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:text-slate-300
+                dark:hover:bg-slate-700
                 disabled:pointer-events-none
                 disabled:opacity-40
               "
@@ -685,7 +723,7 @@ export default function DataTable<T>({
                       ${
                         page === item
                           ? "bg-[#1358A8] text-white shadow-sm"
-                          : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                          : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                       }
                     `}
                 >
@@ -713,6 +751,10 @@ export default function DataTable<T>({
                 transition
                 hover:bg-slate-50
                 hover:text-slate-700
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:text-slate-300
+                dark:hover:bg-slate-700
                 disabled:pointer-events-none
                 disabled:opacity-40
               "
@@ -739,6 +781,10 @@ export default function DataTable<T>({
                 transition
                 hover:bg-slate-50
                 hover:text-slate-700
+                dark:border-slate-700
+                dark:bg-slate-800
+                dark:text-slate-300
+                dark:hover:bg-slate-700
                 disabled:pointer-events-none
                 disabled:opacity-40
               "

@@ -353,8 +353,8 @@ function BeritaComponent() {
               font-semibold
               ${
                 isActive
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-slate-100 text-slate-500"
+                  ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400"
+                  : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
               }
             `}
           >
@@ -372,7 +372,7 @@ function BeritaComponent() {
   // ============================================================
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-5 py-8 sm:px-7 lg:px-8 lg:py-10">
+    <div className="w-full px-5 py-8 sm:px-7 lg:px-8 lg:py-10">
       <div className="mx-auto max-w-[1600px]">
         <DataTable
           data={beritaData}

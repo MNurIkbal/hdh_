@@ -152,19 +152,19 @@ export default function DashboardPage() {
   const totalGrafik = grafikResponse?.data?.total ?? totalDokumen;
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#f5f7fb]">
+    <div className="relative min-h-screen overflow-hidden bg-transparent">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-[420px] w-[420px] animate-pulse rounded-full bg-blue-200/20 blur-3xl" />
+        <div className="absolute -left-32 -top-32 h-[420px] w-[420px] animate-pulse rounded-full bg-blue-500/10 blur-3xl" />
 
         <div
-          className="absolute right-[-120px] top-[180px] h-[420px] w-[420px] rounded-full bg-indigo-200/20 blur-3xl"
+          className="absolute right-[-120px] top-[180px] h-[420px] w-[420px] rounded-full bg-indigo-500/10 blur-3xl"
           style={{
             animation: "float 8s ease-in-out infinite",
           }}
         />
 
         <div
-          className="absolute bottom-[-180px] left-[35%] h-[450px] w-[450px] rounded-full bg-slate-300/20 blur-3xl"
+          className="absolute bottom-[-180px] left-[35%] h-[450px] w-[450px] rounded-full bg-amber-500/5 blur-3xl"
           style={{
             animation: "float 10s ease-in-out infinite reverse",
           }}
@@ -270,29 +270,29 @@ export default function DashboardPage() {
             return (
               <div
                 key={card.title || `summary-card-${index}`}
-                className="group animate-[fadeInUp_0.6s_ease-out] relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-slate-300 hover:shadow-2xl"
+                className="group animate-[fadeInUp_0.6s_ease-out] relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white/90 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-slate-300 hover:shadow-2xl dark:border-slate-800 dark:bg-slate-900/90 dark:hover:border-slate-700"
                 style={{
                   animationDelay: `${index * 100}ms`,
                   animationFillMode: "both",
                 }}
               >
-                <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-slate-50 transition-all duration-500 group-hover:scale-[2.5] group-hover:bg-slate-100" />
+                <div className="absolute -right-10 -top-10 h-24 w-24 rounded-full bg-slate-50 transition-all duration-500 group-hover:scale-[2.5] group-hover:bg-slate-100 dark:bg-slate-800/40 dark:group-hover:bg-slate-800" />
 
                 <div className="relative">
                   <div className="flex items-start justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-slate-950 group-hover:text-white">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-[#1358A8] group-hover:text-white dark:bg-slate-800 dark:text-slate-300">
                       <Icon className="h-5 w-5" />
                     </div>
 
-                    <ArrowUpRight className="h-4 w-4 text-slate-300 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-slate-950" />
+                    <ArrowUpRight className="h-4 w-4 text-slate-300 transition-all duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-[#1358A8] dark:text-slate-600 dark:group-hover:text-blue-400" />
                   </div>
 
-                  <p className="mt-5 text-sm font-medium text-slate-500">
+                  <p className="mt-5 text-sm font-medium text-slate-500 dark:text-slate-400">
                     {card.title}
                   </p>
 
                   <div className="mt-1 flex items-end gap-3">
-                    <p className="text-3xl font-bold text-slate-950">
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white">
                       {card.value}
                     </p>
                   </div>
@@ -302,21 +302,21 @@ export default function DashboardPage() {
           })}
         </section>
 
-        <section className="animate-[fadeInUp_0.9s_ease-out] overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-sm">
+        <section className="animate-[fadeInUp_0.9s_ease-out] overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/95">
           {/* CHART HEADER */}
 
-          <div className="flex flex-col gap-5 border-b border-slate-100 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-5 border-b border-slate-100 px-5 py-5 dark:border-slate-800 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 transition-transform duration-300 hover:scale-110">
-                <BarChart3 className="h-5 w-5 text-slate-700" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 transition-transform duration-300 hover:scale-110">
+                <BarChart3 className="h-5 w-5" />
               </div>
 
               <div>
-                <h2 className="font-semibold text-slate-950">
+                <h2 className="font-semibold text-slate-900 dark:text-white">
                   Statistik Dokumen Hukum
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Perkembangan jumlah dokumen berdasarkan tahun
                 </p>
               </div>

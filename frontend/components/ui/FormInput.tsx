@@ -34,7 +34,7 @@ const FormInput = forwardRef<
         {label && (
           <label
             htmlFor={props.id ?? props.name}
-            className="block text-sm font-medium text-slate-700"
+            className="block text-sm font-medium text-slate-700 dark:text-slate-300"
           >
             {label}
 
@@ -62,6 +62,9 @@ const FormInput = forwardRef<
             text-slate-700
             outline-none
             transition
+            dark:bg-slate-800
+            dark:text-slate-100
+            dark:placeholder:text-slate-500
 
             placeholder:text-slate-400
 
@@ -72,11 +75,12 @@ const FormInput = forwardRef<
             disabled:cursor-not-allowed
             disabled:bg-slate-50
             disabled:text-slate-400
+            dark:disabled:bg-slate-900
 
             ${
               error
                 ? "border-red-400 focus:border-red-500 focus:ring-red-500/10"
-                : "border-slate-200"
+                : "border-slate-200 dark:border-slate-700"
             }
 
             ${className}

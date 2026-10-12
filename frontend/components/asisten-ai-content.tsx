@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Bot, Trash2, ArrowDown, Sparkles, Plus, AlertTriangle, ArrowUp, MessageSquarePlus, FileText, FileSpreadsheet, X } from "lucide-react";
+import { Send, Bot, Trash2, ArrowDown, Sparkles, Plus, AlertTriangle, ArrowUp, MessageSquarePlus, FileText, FileSpreadsheet, X, Scale } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-
-
-import type { ChatMessage } from "@/types/chat";
+import type { ChatMessage, ComparisonData } from "@/types/chat";
+import { DokumenHukum } from "@/feature/dokumen-hukum/types/DokumenHukum.type";
+import ComparisonDraftTable from "@/components/ComparisonDraftTable";
+import DocumentComparisonSelector from "@/components/DocumentComparisonSelector";
 import { sendChatMessage, saveSession, getSessionById, deleteSession } from "@/services/chat-service";
 import { SessionHook } from "@/feature/web";
 
@@ -29,14 +30,13 @@ function newId() {
 /* =========================
    EMPTY STATE (WELCOME AI)
 ========================= */
-const EmptyState = ({ onSelect }: { onSelect: (text: string) => void }) => {
-  const suggestions = [
-    "🔎 Cari Dokumen",
-    "📄 Analisis Dokumen",
-    "⚖️ Bandingkan Dokumen",
-    "✨ Ringkas Dokumen",
-  ];
-
+const EmptyState = ({
+  onSelect,
+  onOpenComparison,
+}: {
+  onSelect: (text: string) => void;
+  onOpenComparison: () => void;
+}) => {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 ">
       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white flex items-center justify-center mb-4 shadow-lg">
@@ -50,19 +50,31 @@ const EmptyState = ({ onSelect }: { onSelect: (text: string) => void }) => {
       </p>
 
       <p className="text-xs text-muted-foreground mb-6">
-        Silakan pilih pertanyaan atau ketik langsung di bawah ini.
+        Silakan pilih opsi perbandingan atau ajukan pertanyaan di bawah ini.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-md">
-        {suggestions.map((item, i) => (
-          <button
-            key={i}
-            onClick={() => onSelect(item)}
-            className="text-left text-sm p-3 rounded-xl border bg-muted hover:bg-primary hover:text-white transition"
-          >
-            {item}
-          </button>
-        ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
+        <button
+          onClick={() => {
+            onSelect("📄 Analisis Dokumen");
+          }}
+          className="text-left text-sm p-3.5 rounded-xl border bg-muted hover:bg-primary hover:text-white transition shadow-sm font-medium"
+        >
+          📄 Analisis Dokumen
+        </button>
+
+        <button
+          onClick={onOpenComparison}
+          className="text-left text-sm p-3.5 rounded-xl border border-blue-200 bg-blue-50/80 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-200 hover:bg-blue-600 hover:text-white transition shadow-sm font-medium flex items-center justify-between group"
+        >
+          <span className="flex items-center gap-1.5">
+            <Scale size={16} className="text-blue-600 group-hover:text-white transition" />
+            Bandingkan Dokumen
+          </span>
+          <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 group-hover:bg-white/20 group-hover:text-white px-2 py-0.5 rounded font-normal transition">
+            Draft Tabel
+          </span>
+        </button>
       </div>
     </div>
   );
@@ -145,6 +157,15 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
   const [showScroll, setShowScroll] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+  const [isComparing, setIsComparing] = useState(false);
+  const [comparisonDoc1, setComparisonDoc1] = useState<DokumenHukum | null>(null);
+  const [comparisonDoc2, setComparisonDoc2] = useState<DokumenHukum | null>(null);
+  const [comparisonSearch1, setComparisonSearch1] = useState("");
+  const [comparisonSearch2, setComparisonSearch2] = useState("");
+  const [comparisonDropdownOpen1, setComparisonDropdownOpen1] = useState(false);
+  const [comparisonDropdownOpen2, setComparisonDropdownOpen2] = useState(false);
+  const [comparisonErrorMsg, setComparisonErrorMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const session = SessionHook();
@@ -475,7 +496,169 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     return false;
   }
 
+  const handleCompareDocuments = useCallback(
+    async (doc1: DokumenHukum, doc2: DokumenHukum) => {
+      if (!conversationId || isTyping || isComparing) return;
+
+      setIsComparisonOpen(false);
+      setIsComparing(true);
+      setIsTyping(true);
+
+      const doc1Info = `${doc1.judul} (No. ${doc1.nomor || "-"} Thn ${doc1.tahun || "-"})`;
+      const doc2Info = `${doc2.judul} (No. ${doc2.nomor || "-"} Thn ${doc2.tahun || "-"})`;
+
+      const userMsg: ChatMessage = {
+        id: newId(),
+        type: "user",
+        message: `Bandingkan Dokumen Hukum:\n• Dokumen 1: ${doc1Info}\n• Dokumen 2: ${doc2Info}`,
+        timestamp: nowTimestamp(),
+      };
+
+      setConversation((prev) => [...prev, userMsg]);
+
+      // Reset pilihan komparasi
+      setComparisonDoc1(null);
+      setComparisonDoc2(null);
+      setComparisonSearch1("");
+      setComparisonSearch2("");
+      setComparisonErrorMsg(null);
+
+      // Susun draft data perbandingan tabel terstruktur
+      const comparisonPayload: ComparisonData = {
+        doc1: {
+          id: doc1.id,
+          judul: doc1.judul,
+          nomor: doc1.nomor || "-",
+          tahun: doc1.tahun || "-",
+          status: doc1.status || "Berlaku",
+          tanggal_penetapan: doc1.tanggal_penetapan || "-",
+          tanggal_berlaku: doc1.tanggal_berlaku || "-",
+          sumber: doc1.sumber || "JDIH BIN",
+          tempat_penetapan: doc1.tempat_penetapan || "Jakarta",
+        },
+        doc2: {
+          id: doc2.id,
+          judul: doc2.judul,
+          nomor: doc2.nomor || "-",
+          tahun: doc2.tahun || "-",
+          status: doc2.status || "Berlaku",
+          tanggal_penetapan: doc2.tanggal_penetapan || "-",
+          tanggal_berlaku: doc2.tanggal_berlaku || "-",
+          sumber: doc2.sumber || "JDIH BIN",
+          tempat_penetapan: doc2.tempat_penetapan || "Jakarta",
+        },
+        items: [
+          {
+            kategori: "Nomor & Tahun Regulasi",
+            doc1Value: `Nomor ${doc1.nomor || "-"} Tahun ${doc1.tahun || "-"}`,
+            doc2Value: `Nomor ${doc2.nomor || "-"} Tahun ${doc2.tahun || "-"}`,
+            analisis:
+              doc1.tahun === doc2.tahun
+                ? "Kedua regulasi ditetapkan pada periode tahun yang sama."
+                : `Ditetapkan pada periode tahun berbeda (${doc1.tahun || "-"} vs ${doc2.tahun || "-"}). Perlu meninjau urutan kronologis pembentukan peraturan.`,
+          },
+          {
+            kategori: "Status Keberlakuan Hukum",
+            doc1Value: doc1.status || "Berlaku",
+            doc2Value: doc2.status || "Berlaku",
+            analisis:
+              doc1.status?.toLowerCase() === doc2.status?.toLowerCase()
+                ? `Kedua dokumen berstatus yuridis: ${doc1.status || "Aktif / Berlaku"}.`
+                : `Status keberlakuan berbeda (${doc1.status || "-"} vs ${doc2.status || "-"}). Periksa apakah dokumen satu mencabut atau mengubah dokumen lainnya.`,
+          },
+          {
+            kategori: "Subjek & Pokok Pengaturan",
+            doc1Value: doc1.subject || doc1.bidang || "Peraturan Intelijen Negara & Kelembagaan",
+            doc2Value: doc2.subject || doc2.bidang || "Peraturan Intelijen Negara & Kelembagaan",
+            analisis:
+              "Meninjau relevansi materi muatan norma hukum serta korelasi kewenangan teknis antar kedua produk regulasi.",
+          },
+          {
+            kategori: "Tanggal & Tempat Penetapan",
+            doc1Value: `${doc1.tempat_penetapan || "Jakarta"}, ${doc1.tanggal_penetapan || "-"}`,
+            doc2Value: `${doc2.tempat_penetapan || "Jakarta"}, ${doc2.tanggal_penetapan || "-"}`,
+            analisis:
+              "Memastikan validitas aspek formil pengesahan dan tanggal mulai berlaku efektifnya ketentuan hukum.",
+          },
+          {
+            kategori: "Sumber Publikasi Lembaran Resmi",
+            doc1Value: doc1.sumber || "Jaringan Dokumentasi & Informasi Hukum BIN",
+            doc2Value: doc2.sumber || "Jaringan Dokumentasi & Informasi Hukum BIN",
+            analisis:
+              "Tercatat dan terpublikasi secara sah pada pangkalan data portal resmi JDIH Badan Intelijen Negara.",
+          },
+          {
+            kategori: "Harmonisasi & Keterkaitan Norma",
+            doc1Value: `Materi pokok: ${doc1.judul}`,
+            doc2Value: `Materi pokok: ${doc2.judul}`,
+            analisis:
+              "Harmonisasi memitigasi tumpang tindih regulasi, menguji konsistensi asas kepastian hukum, dan memperkuat kepatuhan kedinasan.",
+          },
+        ],
+        kesimpulan: `Berdasarkan perbandingan komparatif terhadap "${doc1.judul}" dan "${doc2.judul}", kedua produk hukum memiliki keterkaitan substantif dalam tata kelola regulasi dan pelaksanaan fungsi intelijen negara.`,
+        rekomendasi:
+          "Disarankan untuk mengacu pada regulasi terbaru serta senantiasa memastikan kepatuhan terhadap hierarki perundang-undangan dan asas lex superior / lex posterior.",
+      };
+
+      try {
+        const prompt = `Analisis perbandingan komparatif hukum antara:\n1. ${doc1.judul} (Nomor: ${doc1.nomor || "-"}, Tahun: ${doc1.tahun || "-"}, Status: ${doc1.status || "Berlaku"})\n2. ${doc2.judul} (Nomor: ${doc2.nomor || "-"}, Tahun: ${doc2.tahun || "-"}, Status: ${doc2.status || "Berlaku"}). Jelaskan secara ringkas poin harmonisasi dan implikasi hukum intelijen negara.`;
+
+        const res = await sendChatMessage(prompt, conversationId);
+        const aiResponse = res.message ? cleanAIResponse(res.message) : "";
+
+        if (aiResponse) {
+          comparisonPayload.kesimpulan = aiResponse;
+        }
+
+        const aiMsg: ChatMessage = {
+          id: newId(),
+          type: "assistant",
+          message: "Berikut adalah lembar draft perbandingan dokumen hukum terstruktur antara kedua regulasi yang dipilih:",
+          comparisonData: comparisonPayload,
+          timestamp: nowTimestamp(),
+        };
+
+        setConversation((prev) => [...prev, aiMsg]);
+      } catch {
+        const aiMsg: ChatMessage = {
+          id: newId(),
+          type: "assistant",
+          message: "Berikut adalah lembar draft perbandingan dokumen hukum terstruktur antara kedua regulasi yang dipilih:",
+          comparisonData: comparisonPayload,
+          timestamp: nowTimestamp(),
+        };
+
+        setConversation((prev) => [...prev, aiMsg]);
+      } finally {
+        setIsTyping(false);
+        setIsComparing(false);
+      }
+    },
+    [conversationId, isTyping, isComparing]
+  );
+
   const handleSendMessage = useCallback(async () => {
+    // Jika panel perbandingan dokumen sedang terbuka, submit dilakukan melalui tombol chat ini
+    if (isComparisonOpen) {
+      setComparisonErrorMsg(null);
+
+      if (!comparisonDoc1 || !comparisonDoc2) {
+        setComparisonErrorMsg("Minimal harus memilih 2 dokumen hukum untuk dibandingkan.");
+        return;
+      }
+
+      if (
+        comparisonDoc1.id === comparisonDoc2.id ||
+        comparisonDoc1.judul.trim().toLowerCase() === comparisonDoc2.judul.trim().toLowerCase()
+      ) {
+        setComparisonErrorMsg("Judul dokumen hukum tidak boleh sama. Harap pilih 2 dokumen hukum yang berbeda.");
+        return;
+      }
+
+      await handleCompareDocuments(comparisonDoc1, comparisonDoc2);
+      return;
+    }
+
     if ((!message.trim() && selectedFiles.length === 0) || !conversationId || isTyping) {
       return;
     }
@@ -547,7 +730,16 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     } finally {
       setIsTyping(false);
     }
-  }, [message, conversationId, isTyping, conversation]);
+  }, [
+    message,
+    conversationId,
+    isTyping,
+    conversation,
+    isComparisonOpen,
+    comparisonDoc1,
+    comparisonDoc2,
+    handleCompareDocuments,
+  ]);
 
 
 
@@ -619,13 +811,17 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
         className="flex-1 overflow-y-auto w-full relative"
       >
         <div className="flex justify-center min-h-full pb-4">
-          <div className="w-full max-w-[900px] p-4 flex flex-col">
+          <div className="w-full max-w-[950px] p-4 flex flex-col">
             {conversation.length === 0 ? (
-              <EmptyState onSelect={(text) => setMessage(text)} />
+              <EmptyState 
+                onSelect={(text) => setMessage(text)} 
+                onOpenComparison={() => setIsComparisonOpen(true)}
+              />
             ) : (
-              <div className="space-y-4 flex-1 flex flex-col justify-end">
+              <div className="space-y-5 flex-1 flex flex-col justify-end">
                 {conversation.map((msg, i) => {
                   const isUser = msg.type === "user";
+                  const hasComparison = !!msg.comparisonData;
 
                   return (
                     <div
@@ -633,22 +829,35 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
                       ref={
                         i === conversation.length - 1 ? lastMessageRef : null
                       }
-                      className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"
-                        }`}
+                      className={`flex gap-3 ${
+                        hasComparison ? "justify-start w-full" : isUser ? "justify-end" : "justify-start"
+                      }`}
                     >
                       {!isUser && (
-                        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white">
+                        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white shrink-0 mt-0.5">
                           <Bot size={16} />
                         </div>
                       )}
 
                       <div
-                        className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm ${isUser
-                            ? "bg-primary text-white rounded-br-sm"
-                            : "bg-muted rounded-bl-sm"
-                          }`}
+                        className={`text-sm shadow-sm transition-all ${
+                          hasComparison
+                            ? "w-full max-w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-100 rounded-2xl p-4 sm:p-5"
+                            : isUser
+                            ? "max-w-[80%] bg-primary text-white rounded-2xl rounded-br-sm px-4 py-3"
+                            : "max-w-[80%] bg-muted rounded-2xl rounded-bl-sm px-4 py-3"
+                        }`}
                       >
-                        {isUser ? (
+                        {hasComparison && msg.comparisonData ? (
+                          <div>
+                            {msg.message && (
+                              <p className="font-medium text-slate-700 dark:text-slate-200 text-sm mb-2 leading-relaxed">
+                                {msg.message}
+                              </p>
+                            )}
+                            <ComparisonDraftTable data={msg.comparisonData} />
+                          </div>
+                        ) : isUser ? (
                           <div className="flex flex-col gap-2">
                             {msg.files && msg.files.length > 0 && (
                               <div className="flex flex-wrap gap-2 mb-1">
@@ -706,86 +915,137 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
 
       {/* FIXED INPUT AREA AT THE BOTTOM */}
       <div className="w-full flex justify-center shrink-0 p-4 pb-6">
-        <div className="w-full max-w-[800px] flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm transition-all">
-          {/* File Preview */}
-          {selectedFiles.length > 0 && (
-            <div className="px-4 pt-4 pb-1 flex items-center flex-wrap gap-2">
-              {selectedFiles.map((file, index) => (
-                <div key={index} className="flex items-center gap-3 bg-slate-50 p-2 pr-3 rounded-xl border border-slate-200">
-                  <div className="p-2 bg-white rounded-lg shadow-sm">
-                    {file.type === "application/pdf" || file.name.toLowerCase().endsWith('.pdf') ? (
-                      <FileText className="text-red-500" size={20} />
-                    ) : (
-                      <FileSpreadsheet className="text-green-600" size={20} />
-                    )}
-                  </div>
-                  <div className="flex flex-col max-w-[120px] sm:max-w-[150px]">
-                     <span className="text-sm font-medium text-slate-700 truncate">{file.name}</span>
-                     <span className="text-xs text-slate-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                  </div>
-                  <button 
-                    onClick={() => removeFile(index)} 
-                    className="ml-1 p-1 text-slate-400 hover:text-red-500 hover:bg-slate-200 rounded-full transition"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Error Message */}
-          {fileError && (
-            <div className="px-4 pt-3 pb-1">
-              <p className="text-xs text-red-500 flex items-center gap-1">
-                <AlertTriangle size={14} /> {fileError}
-              </p>
-            </div>
-          )}
-
-          <div className="flex items-end p-1.5 pl-3 gap-2">
-            <input 
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-              multiple
-              accept=".pdf,.xls,.xlsx,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            />
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              title="Upload Dokumen"
-              className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition mb-0.5"
-            >
-              <Plus size={22} />
-            </button>
-            
-          <textarea
-            value={message}
-            onChange={(e) => {
-              setMessage(e.target.value);
-              e.target.style.height = 'auto';
-              e.target.style.height = e.target.scrollHeight + 'px';
-            }}
-            onKeyDown={handleKeyDown}
-            disabled={isTyping}
-            placeholder="Ketik pesan..."
-            className="flex-1 resize-none bg-transparent py-3 text-[15px] text-slate-800 placeholder:text-slate-400 focus:outline-none disabled:opacity-60 max-h-[150px]"
-            rows={1}
-            style={{ minHeight: '44px' }}
+        <div className="w-full max-w-[850px] flex flex-col">
+          {/* Document Comparison 2-Column Selector Component */}
+          <DocumentComparisonSelector
+            isOpen={isComparisonOpen}
+            onClose={() => setIsComparisonOpen(false)}
+            doc1={comparisonDoc1}
+            doc2={comparisonDoc2}
+            setDoc1={setComparisonDoc1}
+            setDoc2={setComparisonDoc2}
+            search1={comparisonSearch1}
+            setSearch1={setComparisonSearch1}
+            search2={comparisonSearch2}
+            setSearch2={setComparisonSearch2}
+            dropdownOpen1={comparisonDropdownOpen1}
+            setDropdownOpen1={setComparisonDropdownOpen1}
+            dropdownOpen2={comparisonDropdownOpen2}
+            setDropdownOpen2={setComparisonDropdownOpen2}
+            errorMsg={comparisonErrorMsg}
+            setErrorMsg={setComparisonErrorMsg}
           />
 
-          <button
-            onClick={handleSendMessage}
-            disabled={isTyping || (!message.trim() && selectedFiles.length === 0)}
-            className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-blue-600 text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 mb-0.5"
-          >
-            <ArrowUp
-              size={20}
-              strokeWidth={2.5}
-              className={isTyping ? "animate-pulse" : ""}
-            />
-          </button>
+          <div className="w-full flex flex-col bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all">
+            {/* File Preview */}
+            {selectedFiles.length > 0 && (
+              <div className="px-4 pt-4 pb-1 flex items-center flex-wrap gap-2">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="flex items-center gap-3 bg-slate-50 dark:bg-slate-800 p-2 pr-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <div className="p-2 bg-white dark:bg-slate-700 rounded-lg shadow-sm">
+                      {file.type === "application/pdf" || file.name.toLowerCase().endsWith('.pdf') ? (
+                        <FileText className="text-red-500" size={20} />
+                      ) : (
+                        <FileSpreadsheet className="text-green-600" size={20} />
+                      )}
+                    </div>
+                    <div className="flex flex-col max-w-[120px] sm:max-w-[150px]">
+                       <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{file.name}</span>
+                       <span className="text-xs text-slate-500 dark:text-slate-400">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                    <button 
+                      onClick={() => removeFile(index)} 
+                      className="ml-1 p-1 text-slate-400 hover:text-red-500 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Error Message */}
+            {fileError && (
+              <div className="px-4 pt-3 pb-1">
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <AlertTriangle size={14} /> {fileError}
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-end p-1.5 pl-3 gap-2">
+              <input 
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                multiple
+                accept=".pdf,.xls,.xlsx,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              />
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                title="Upload Dokumen"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition mb-0.5"
+              >
+                <Plus size={22} />
+              </button>
+
+              {/* Perbandingan Dokumen Button Trigger */}
+              <button
+                type="button"
+                onClick={() => {
+                  setComparisonErrorMsg(null);
+                  setIsComparisonOpen(!isComparisonOpen);
+                }}
+                title="Buka Perbandingan Dokumen Hukum (2 Kolom)"
+                className={`h-10 px-3 shrink-0 flex items-center gap-1.5 rounded-full text-xs font-medium transition mb-0.5 ${
+                  isComparisonOpen
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                }`}
+              >
+                <Scale size={16} />
+                <span className="hidden sm:inline font-medium">Bandingkan</span>
+              </button>
+              
+              <textarea
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  e.target.style.height = 'auto';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                onKeyDown={handleKeyDown}
+                disabled={isTyping || isComparing}
+                placeholder={
+                  isComparisonOpen 
+                    ? "Klik panah kirim di samping untuk memproses perbandingan 2 dokumen..." 
+                    : "Ketik pesan..."
+                }
+                className="flex-1 resize-none bg-transparent py-3 text-[15px] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none disabled:opacity-60 max-h-[150px]"
+                rows={1}
+                style={{ minHeight: '44px' }}
+              />
+
+              <button
+                onClick={handleSendMessage}
+                disabled={
+                  isTyping ||
+                  isComparing ||
+                  (isComparisonOpen
+                    ? (!comparisonDoc1 || !comparisonDoc2)
+                    : (!message.trim() && selectedFiles.length === 0))
+                }
+                title={isComparisonOpen ? "Kirim dan Bandingkan Dokumen" : "Kirim Pesan"}
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-blue-600 text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 mb-0.5"
+              >
+                <ArrowUp
+                  size={20}
+                  strokeWidth={2.5}
+                  className={isTyping || isComparing ? "animate-pulse" : ""}
+                />
+              </button>
+            </div>
           </div>
         </div>
       </div>

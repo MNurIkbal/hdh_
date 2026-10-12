@@ -335,24 +335,39 @@ function PenggunaContent() {
         key: "nama",
         label: "Nama",
         sortable: true,
+        render: (value) => (
+          <span className="font-semibold text-slate-800 dark:text-slate-100">
+            {String(value ?? "-")}
+          </span>
+        ),
       },
 
       {
         key: "email",
         label: "Email",
         sortable: true,
+        render: (value) => (
+          <span className="text-slate-600 dark:text-slate-300">
+            {String(value ?? "-")}
+          </span>
+        ),
       },
 
       {
         key: "role",
         label: "Role",
         sortable: true,
+        render: (value) => (
+          <span className="inline-flex items-center rounded-lg border border-blue-500/20 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+            {String(value ?? "-")}
+          </span>
+        ),
       },
     ];
 
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] px-5 py-8 sm:px-7 lg:px-8 lg:py-10">
+    <div className="w-full px-5 py-8 sm:px-7 lg:px-8 lg:py-10">
       <div className="mx-auto max-w-[1600px]">
 
         <DataTable

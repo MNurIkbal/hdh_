@@ -2,7 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark, .dark *));
 
 @theme inline {
   --color-ring: var(--ring);
@@ -46,9 +46,8 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.22 0.02 25);
 
-  /* Primary: deep maroon */
-  /* --primary: oklch(0.45 0.25 264); */
-  --primary:  rgb(13, 59, 115);
+  /* Primary: deep navy */
+  --primary: rgb(13, 59, 115);
   --primary-foreground: oklch(0.98 0 0);
 
   /* Secondary: warm light */
@@ -66,8 +65,42 @@
   --border: oklch(0.9 0.008 70);
   --input: oklch(0.9 0.008 70);
   --ring: oklch(0.4 0.13 22);
-   --ink-950: oklch(0.16 0.045 264);
+  --ink-950: oklch(0.16 0.045 264);
   --ink-900: oklch(0.205 0.05 264);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Neutrals for Dark Mode - Deep refined midnight navy */
+  --background: oklch(0.14 0.022 250);
+  --foreground: oklch(0.96 0.005 250);
+  --card: oklch(0.18 0.025 250);
+  --card-foreground: oklch(0.96 0.005 250);
+  --popover: oklch(0.18 0.025 250);
+  --popover-foreground: oklch(0.96 0.005 250);
+
+  /* Primary: Deep Royal Navy */
+  --primary: rgb(18, 70, 136);
+  --primary-foreground: oklch(0.98 0 0);
+
+  /* Secondary */
+  --secondary: oklch(0.23 0.025 250);
+  --secondary-foreground: oklch(0.92 0.01 250);
+
+  --muted: oklch(0.22 0.022 250);
+  --muted-foreground: oklch(0.68 0.025 250);
+
+  /* Accent: gold */
+  --accent: oklch(0.78 0.11 82);
+  --accent-foreground: oklch(0.16 0.03 250);
+
+  --destructive: oklch(0.58 0.22 27);
+  --border: oklch(0.27 0.022 250);
+  --input: oklch(0.27 0.022 250);
+  --ring: oklch(0.55 0.14 250);
+  --ink-950: oklch(0.11 0.025 250);
+  --ink-900: oklch(0.15 0.03 250);
 }
 
 @layer base {
@@ -76,7 +109,68 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
+}
+
+/* Seamless dark mode adaptations */
+.dark .bg-\[\#F8FAFC\] {
+  background-color: oklch(0.12 0.02 250) !important;
+}
+
+.dark .bg-slate-50\/70,
+.dark .bg-slate-50\/50,
+.dark .bg-slate-50 {
+  background-color: oklch(0.16 0.022 250);
+}
+
+.dark .hover\:bg-slate-50:hover {
+  background-color: oklch(0.19 0.025 250);
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background-color: oklch(0.22 0.025 250);
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100 {
+  border-color: oklch(0.24 0.022 250);
+}
+
+.dark .text-slate-800 {
+  color: oklch(0.95 0.01 250);
+}
+
+.dark .text-slate-700 {
+  color: oklch(0.88 0.015 250);
+}
+
+.dark .text-slate-600 {
+  color: oklch(0.75 0.02 250);
+}
+
+.dark .text-slate-500 {
+  color: oklch(0.65 0.02 250);
+}
+
+.dark .text-slate-400 {
+  color: oklch(0.55 0.02 250);
+}
+
+.dark .bg-white {
+  background-color: oklch(0.17 0.025 250);
+}
+
+.dark .bg-white\/95 {
+  background-color: oklch(0.17 0.025 250 / 0.95);
+}
+
+.dark .bg-white\/90 {
+  background-color: oklch(0.17 0.025 250 / 0.9);
+}
+
+.dark .bg-white\/80 {
+  background-color: oklch(0.17 0.025 250 / 0.8);
 }
 
 

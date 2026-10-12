@@ -58,11 +58,15 @@ export default function ConfirmDeleteModal({
           overflow-hidden
           rounded-2xl
           bg-white
+          border
+          border-slate-100
           shadow-[0_25px_80px_rgba(15,23,42,0.22)]
           animate-in
           zoom-in-95
           slide-in-from-bottom-2
           duration-200
+          dark:border-slate-800
+          dark:bg-slate-900
         "
       >
         {/* ================================================= */}
@@ -78,6 +82,7 @@ export default function ConfirmDeleteModal({
             border-slate-100
             px-6
             py-4
+            dark:border-slate-800
           "
         >
           <span
@@ -87,6 +92,7 @@ export default function ConfirmDeleteModal({
               uppercase
               tracking-[0.14em]
               text-slate-400
+              dark:text-slate-500
             "
           >
             Konfirmasi
@@ -110,6 +116,8 @@ export default function ConfirmDeleteModal({
               hover:bg-slate-100
               hover:text-slate-600
               hover:rotate-90
+              dark:hover:bg-slate-800
+              dark:hover:text-slate-200
               disabled:cursor-not-allowed
               disabled:opacity-50
             "
@@ -151,6 +159,7 @@ export default function ConfirmDeleteModal({
                 inset-0
                 rounded-2xl
                 bg-red-100
+                dark:bg-red-950/40
                 animate-pulse
               "
             />
@@ -170,6 +179,9 @@ export default function ConfirmDeleteModal({
                 text-red-500
                 ring-1
                 ring-red-100
+                dark:bg-red-950/60
+                dark:text-red-400
+                dark:ring-red-900/40
               "
             >
               <AlertTriangle
@@ -187,6 +199,7 @@ export default function ConfirmDeleteModal({
               font-bold
               tracking-tight
               text-slate-800
+              dark:text-slate-100
             "
           >
             {title}
@@ -202,6 +215,7 @@ export default function ConfirmDeleteModal({
               text-sm
               leading-6
               text-slate-500
+              dark:text-slate-400
             "
           >
             {description}
@@ -221,6 +235,8 @@ export default function ConfirmDeleteModal({
             bg-slate-50/70
             px-6
             py-4
+            dark:border-slate-800
+            dark:bg-slate-900/60
           "
         >
           {/* BATAL */}
@@ -244,6 +260,10 @@ export default function ConfirmDeleteModal({
               duration-200
               hover:border-slate-300
               hover:bg-slate-50
+              dark:border-slate-700
+              dark:bg-slate-800
+              dark:text-slate-300
+              dark:hover:bg-slate-700
               active:scale-[0.98]
               disabled:cursor-not-allowed
               disabled:opacity-50
