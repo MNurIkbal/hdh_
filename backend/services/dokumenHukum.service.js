@@ -41,7 +41,7 @@ const getAll = async ({
 
     const backendUrl =
         process.env.APP_BACKEND_URL ||
-        "https://jdih-be.asiasistem.com";
+        "https://hdh-be.asiasistem.com";
 
     const fileBaseUrl =
         `${backendUrl.replace(
@@ -90,7 +90,7 @@ const getById = async (id) => {
 
     const backendUrl =
         process.env.APP_BACKEND_URL ||
-        "https://jdih-be.asiasistem.com";
+        "https://hdh-be.asiasistem.com";
 
     const fileBaseUrl =
         `${backendUrl.replace(

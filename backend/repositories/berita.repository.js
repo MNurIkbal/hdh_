@@ -231,7 +231,7 @@ const remove = async (id) => {
 };
 
 const backendUrl =
-  process.env.APP_BACKEND_URL || "https://jdih-be.asiasistem.com";
+  process.env.APP_BACKEND_URL || "https://hdh-be.asiasistem.com";
 
 const imageBaseUrl = `${backendUrl.replace(/\/$/, "")}/uploads/berita`;
 

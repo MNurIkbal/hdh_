@@ -1,4 +1,4 @@
-export const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_BASE_URL ?? "https://jdih-be.asiasistem.com";
+export const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_BASE_URL ?? "https://hdh-be.asiasistem.com";
 
 export const DOKUMEN_ENDPOINT = "/dokumen";
 export const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3 MB

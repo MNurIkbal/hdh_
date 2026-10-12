@@ -20,7 +20,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:8080",
   "https://jdih.asiasistem.com",
-  "https://jdih-be.asiasistem.com"
+  "https://hdh-be.asiasistem.com"
 ];
 
 app.use(

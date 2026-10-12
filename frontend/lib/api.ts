@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = process.env.NEXT_PUBLIC_APP_BACKEND_URL || "https://jdih-be.asiasistem.com";
+const API_URL = process.env.NEXT_PUBLIC_APP_BACKEND_URL || "https://hdh-be.asiasistem.com";
 
 if (!API_URL) {
   throw new Error("NEXT_PUBLIC_APP_BACKEND_URL belum dikonfigurasi");

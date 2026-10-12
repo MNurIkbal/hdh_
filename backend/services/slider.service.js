@@ -97,7 +97,7 @@ const getAll = async ({ search = "", page = 1, size = 10 } = {}) => {
 
   const totalPages = total > 0 ? Math.ceil(total / size) : 0;
 
-  const backendUrl = process.env.APP_BACKEND_URL || "https://jdih-be.asiasistem.com";
+  const backendUrl = process.env.APP_BACKEND_URL || "https://hdh-be.asiasistem.com";
 
   const imageBaseUrl = `${backendUrl.replace(/\/$/, "")}/uploads/sliders`;
 
@@ -269,7 +269,7 @@ const removeUploadedImage = (filename) => {
 
 const getRessult = async () => {
   const backendUrl =
-    process.env.APP_BACKEND_URL || "https://jdih-be.asiasistem.com";
+    process.env.APP_BACKEND_URL || "https://hdh-be.asiasistem.com";
 
   const imageBaseUrl =
     `${backendUrl.replace(/\/$/, "")}/uploads/sliders`;
