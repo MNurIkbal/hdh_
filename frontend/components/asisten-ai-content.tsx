@@ -58,7 +58,7 @@ const EmptyState = ({
         <Sparkles size={26} />
       </div>
 
-      <h2 className="text-lg font-semibold mb-1">Asisten AI Harmonisasi Dokumen Hukum</h2>
+      <h2 className="text-lg font-semibold mb-1">Asisten  Harmonisasi Dokumen Hukum</h2>
 
       <p className="text-sm text-muted-foreground mb-4 max-w-md leading-relaxed">
         Sistem ini merupakan platform untuk mengelola, memproses, mencari, dan menganalisis dokumen hukum secara terstruktur.
@@ -969,7 +969,10 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
           {/* Document Comparison 2-Column Selector Component */}
           <DocumentComparisonSelector
             isOpen={isComparisonOpen}
-            onClose={() => setIsComparisonOpen(false)}
+            onClose={() => {
+              setIsComparisonOpen(false);
+              setComparisonErrorMsg(null);
+            }}
             doc1={comparisonDoc1}
             doc2={comparisonDoc2}
             setDoc1={setComparisonDoc1}
@@ -1045,17 +1048,30 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
                 type="button"
                 onClick={() => {
                   setComparisonErrorMsg(null);
-                  setIsComparisonOpen(!isComparisonOpen);
+                  setIsComparisonOpen((prev) => !prev);
                 }}
-                title="Buka Perbandingan Dokumen Hukum (2 Kolom)"
-                className={`h-10 px-3 shrink-0 flex items-center gap-1.5 rounded-full text-xs font-medium transition mb-0.5 ${
+                title={isComparisonOpen ? "Tutup Perbandingan Dokumen" : "Buka Perbandingan Dokumen Hukum (2 Kolom)"}
+                className={`h-10 px-3 shrink-0 flex items-center gap-1.5 rounded-full text-xs font-medium transition mb-0.5 cursor-pointer ${
                   isComparisonOpen
-                    ? "bg-blue-600 text-white shadow-sm"
+                    ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
                     : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
                 <Scale size={16} />
-                <span className="hidden sm:inline font-medium">Bandingkan</span>
+                <span className="font-medium">Bandingkan</span>
+                {isComparisonOpen && (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsComparisonOpen(false);
+                      setComparisonErrorMsg(null);
+                    }}
+                    className="ml-0.5 p-0.5 rounded-full hover:bg-white/20 transition cursor-pointer"
+                    title="Tutup / Nonaktifkan"
+                  >
+                    <X size={13} />
+                  </span>
+                )}
               </button>
               
               <textarea

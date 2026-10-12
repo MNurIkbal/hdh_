@@ -400,7 +400,7 @@ export default function DashboardPage() {
           }
         }
       `}</style>
-    </main>
+    </div>
   );
 }
 
