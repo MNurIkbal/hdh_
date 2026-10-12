@@ -21,7 +21,7 @@ export default function AdminChatIdPage() {
       <div className="lg:pl-[275px] flex flex-col min-h-screen">
         <AdminNavbar
           onMenuClick={() => setSidebarOpen(true)}
-          title="Asisten AI HDH"
+          title="Asisten HDH"
           subtitle="Konsultasi dan analisis regulasi terintegrasi"
         />
         

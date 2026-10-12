@@ -144,9 +144,7 @@ export default function DocumentComparisonSelector({
             <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
               Perbandingan Dokumen Hukum
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Pilih dua dokumen hukum yang berbeda dari pangkalan data JDIH untuk dibandingkan.
-            </p>
+            
           </div>
         </div>
 
@@ -256,9 +254,9 @@ export default function DocumentComparisonSelector({
                 </button>
               </div>
 
-              {/* Dropdown Options List */}
+              {/* Dropdown Options List (Muncul ke ATAS input agar tidak tertutup) */}
               {dropdownOpen1 && (
-                <div className="absolute z-50 left-0 right-0 mt-1.5 max-h-56 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs">
+                <div className="absolute z-[70] left-0 right-0 bottom-full mb-1.5 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-1 text-xs">
                   {filteredList1.length === 0 ? (
                     <div className="p-3 text-center text-slate-400">
                       {isLoading ? "Mengambil daftar dokumen..." : "Tidak ada dokumen hukum yang cocok."}
@@ -382,9 +380,9 @@ export default function DocumentComparisonSelector({
                 </button>
               </div>
 
-              {/* Dropdown Options List */}
+              {/* Dropdown Options List (Muncul ke ATAS input agar tidak tertutup) */}
               {dropdownOpen2 && (
-                <div className="absolute z-50 left-0 right-0 mt-1.5 max-h-56 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl py-1 text-xs">
+                <div className="absolute z-[70] left-0 right-0 bottom-full mb-1.5 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl py-1 text-xs">
                   {filteredList2.length === 0 ? (
                     <div className="p-3 text-center text-slate-400">
                       {isLoading ? "Mengambil daftar dokumen..." : "Tidak ada dokumen hukum yang cocok."}

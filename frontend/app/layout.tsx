@@ -18,9 +18,9 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "JDIH BIN — Jaringan Dokumentasi dan Informasi Hukum",
+  title: "HDH BIN — Harmonisasi Dokumen Hukum",
   description:
-    "Portal Jaringan Dokumentasi dan Informasi Hukum Badan Intelijen Negara. Akses produk hukum, peraturan, dan informasi resmi.",
+    "Portal Harmonisasi Dokumen Hukum Badan Intelijen Negara. Akses produk hukum, peraturan, dan informasi resmi.",
 };
 
 export const viewport: Viewport = {

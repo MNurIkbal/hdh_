@@ -2,10 +2,28 @@
 
 import React, { useRef } from "react";
 import { Printer, FileText, CheckCircle2, AlertCircle, ArrowRightLeft, Scale, Layers } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 import { ComparisonData } from "@/types/chat";
 
 interface ComparisonDraftTableProps {
   data: ComparisonData;
+}
+
+function formatTanggalIndo(dateStr?: string): string {
+  if (!dateStr || dateStr === "-") return "-";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
 }
 
 export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps) {
@@ -25,7 +43,7 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Hasil Perbandingan Dokumen Hukum - JDIH BIN</title>
+          <title>Hasil Perbandingan Dokumen Hukum - HDH BIN</title>
           <style>
             @page {
               size: A4 portrait;
@@ -110,15 +128,26 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
             .section-box {
               border-left: 4px solid #0D3B73;
               background-color: #F8FAFC;
-              padding: 10px 14px;
+              padding: 12px 14px;
+              margin-top: 15px;
               margin-bottom: 14px;
               border-radius: 0 6px 6px 0;
               font-size: 10pt;
             }
-            .section-box h4 {
-              margin: 0 0 5px 0;
+            .section-box h3, .section-box h4 {
+              margin: 10px 0 6px 0;
               color: #0B2545;
-              font-size: 10.5pt;
+              font-size: 11pt;
+            }
+            .section-box p {
+              margin: 4px 0 8px 0;
+            }
+            .section-box ul, .section-box ol {
+              margin: 4px 0 8px 18px;
+              padding: 0;
+            }
+            .section-box li {
+              margin-bottom: 4px;
             }
             .footer-info {
               margin-top: 30px;
@@ -132,16 +161,13 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
         </head>
         <body>
           <div class="header">
-            <div class="logo-title">JARINGAN DOKUMENTASI DAN INFORMASI HUKUM (JDIH)</div>
+            <div class="logo-title">Harmonisasi Dokumen Hukum (HDH)</div>
             <div class="subtitle">BADAN INTELIJEN NEGARA &bull; LEMBAR RESMI DRAFT PERBANDINGAN DOKUMEN HUKUM</div>
             <div style="font-size: 8.5pt; color: #6B7280; margin-top: 4px;">Tanggal Cetak: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })} WIB</div>
           </div>
 
           ${printContent.innerHTML}
 
-          <div class="footer-info">
-            Dicetak secara otomatis melalui Sistem Asisten Analisis Hukum JDIH BIN
-          </div>
         </body>
       </html>
     `);
@@ -163,14 +189,14 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
             <Layers size={15} />
           </span>
           <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
-            Draft Perbandingan Dokumen Hukum
+            Perbandingan Dokumen Hukum
           </span>
         </div>
 
         <button
           type="button"
           onClick={handlePrint}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-[#C9A15A] hover:bg-slate-50 hover:text-slate-900 dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-[#C9A15A] dark:hover:bg-slate-700"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs transition hover:border-[#C9A15A] hover:bg-slate-50 hover:text-slate-900 dark:border-white/15 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-[#C9A15A] dark:hover:bg-slate-700 cursor-pointer"
           title="Cetak Draft Perbandingan"
         >
           <Printer size={14} className="text-[#1358A8] dark:text-[#E0C084]" />
@@ -194,13 +220,6 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
             <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2" title={data.doc1.judul}>
               {data.doc1.judul}
             </h4>
-            <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-slate-600 dark:text-slate-300">
-              <div><span className="text-slate-400">Nomor/Tahun:</span> {data.doc1.nomor || "-"} / {data.doc1.tahun || "-"}</div>
-              <div><span className="text-slate-400">Status:</span> <span className="font-medium text-emerald-600 dark:text-emerald-400">{data.doc1.status || "Aktif"}</span></div>
-              {data.doc1.tanggal_penetapan && (
-                <div className="col-span-2"><span className="text-slate-400">Tgl Penetapan:</span> {data.doc1.tanggal_penetapan}</div>
-              )}
-            </div>
           </div>
 
           {/* Doc 2 Card */}
@@ -212,13 +231,6 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
             <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2" title={data.doc2.judul}>
               {data.doc2.judul}
             </h4>
-            <div className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-slate-600 dark:text-slate-300">
-              <div><span className="text-slate-400">Nomor/Tahun:</span> {data.doc2.nomor || "-"} / {data.doc2.tahun || "-"}</div>
-              <div><span className="text-slate-400">Status:</span> <span className="font-medium text-emerald-600 dark:text-emerald-400">{data.doc2.status || "Aktif"}</span></div>
-              {data.doc2.tanggal_penetapan && (
-                <div className="col-span-2"><span className="text-slate-400">Tgl Penetapan:</span> {data.doc2.tanggal_penetapan}</div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -263,31 +275,107 @@ export default function ComparisonDraftTable({ data }: ComparisonDraftTableProps
           </table>
         </div>
 
-        {/* Conclusion / Harmonization Notes */}
+        {/* Conclusion / Harmonization Notes rendered with rich Markdown */}
         {data.kesimpulan && (
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-white/10 dark:bg-white/[0.03]">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white mb-1.5">
-              <CheckCircle2 size={16} className="text-emerald-500" />
+          <div className="mt-4 rounded-xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-slate-800/40 section-box">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-900 dark:text-white mb-2.5 pb-1.5 border-b border-slate-200/60 dark:border-white/10">
+              <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
               <span>Kesimpulan & Harmonisasi Regulasi:</span>
             </div>
-            <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line">
-              {data.kesimpulan}
-            </p>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed text-slate-700 dark:text-slate-200">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  h1: ({ children }) => (
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white mt-3 mb-1.5 pb-1 border-b border-slate-200 dark:border-white/10">
+                      {children}
+                    </h3>
+                  ),
+                  h2: ({ children }) => (
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white mt-3 mb-1.5">
+                      {children}
+                    </h4>
+                  ),
+                  h3: ({ children }) => (
+                    <h5 className="text-xs font-semibold text-slate-800 dark:text-slate-200 mt-2 mb-1">
+                      {children}
+                    </h5>
+                  ),
+                  p: ({ children }) => (
+                    <p className="mb-2 leading-relaxed text-xs text-slate-700 dark:text-slate-300">
+                      {children}
+                    </p>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="list-disc pl-4 mb-2.5 space-y-1 text-xs text-slate-700 dark:text-slate-300">
+                      {children}
+                    </ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="list-decimal pl-4 mb-2.5 space-y-1 text-xs text-slate-700 dark:text-slate-300">
+                      {children}
+                    </ol>
+                  ),
+                  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                      <table className="w-full text-xs border-collapse">{children}</table>
+                    </div>
+                  ),
+                  th: ({ children }) => (
+                    <th className="border border-slate-200 dark:border-slate-700 px-3 py-2 bg-slate-100 dark:bg-slate-800 font-bold text-slate-800 dark:text-slate-200 text-left">
+                      {children}
+                    </th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="border border-slate-200 dark:border-slate-700 px-3 py-2 align-top text-slate-700 dark:text-slate-300">
+                      {children}
+                    </td>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-semibold text-slate-900 dark:text-white">
+                      {children}
+                    </strong>
+                  ),
+                  hr: () => (
+                    <hr className="my-3 border-slate-200 dark:border-slate-700" />
+                  ),
+                }}
+              >
+                {data.kesimpulan}
+              </ReactMarkdown>
+            </div>
           </div>
         )}
 
         {/* Recommendations */}
-        {data.rekomendasi && (
+        {/* {data.rekomendasi && (
           <div className="mt-3 rounded-xl border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/20">
-            <div className="flex items-center gap-2 text-xs font-bold text-blue-900 dark:text-blue-200 mb-1.5">
-              <Scale size={16} className="text-[#1358A8] dark:text-[#E0C084]" />
+            <div className="flex items-center gap-2 text-xs font-bold text-blue-900 dark:text-blue-200 mb-1.5 pb-1 border-b border-blue-200/50 dark:border-blue-900/40">
+              <Scale size={16} className="text-[#1358A8] dark:text-[#E0C084] shrink-0" />
               <span>Rekomendasi Tindak Lanjut Unit Kerja:</span>
             </div>
-            <p className="text-xs leading-relaxed text-slate-700 dark:text-slate-300 whitespace-pre-line">
-              {data.rekomendasi}
-            </p>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  p: ({ children }) => <p className="mb-1 text-xs">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc pl-4 space-y-0.5 text-xs">{children}</ul>,
+                  li: ({ children }) => <li>{children}</li>,
+                  strong: ({ children }) => (
+                    <strong className="font-semibold text-blue-950 dark:text-blue-200">
+                      {children}
+                    </strong>
+                  ),
+                }}
+              >
+                {data.rekomendasi}
+              </ReactMarkdown>
+            </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

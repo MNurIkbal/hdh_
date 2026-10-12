@@ -97,7 +97,7 @@ export default function UjdihPerwakilanPage() {
       </div>
 
       <p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">
-        Informasi jaringan JDIH Perwakilan sebagai bagian dari pengelolaan
+        Informasi jaringan HDH Perwakilan sebagai bagian dari pengelolaan
         dan penyebarluasan dokumentasi serta informasi hukum di lingkungan
         Badan Intelijen Negara.
       </p>

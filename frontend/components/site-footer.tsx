@@ -367,7 +367,7 @@ export function SiteFooter() {
                   text-white
                 "
               >
-                Jaringan Dokumentasi dan Informasi Hukum Badan Intelijen Negara
+                Harmonisasi Dokumen Hukum Badan Intelijen Negara
                 Republik Indonesia merupakan portal resmi yang menyediakan
                 dokumentasi dan informasi hukum secara terintegrasi, mudah
                 diakses, dan terpercaya.

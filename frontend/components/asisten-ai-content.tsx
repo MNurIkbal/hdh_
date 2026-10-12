@@ -23,6 +23,21 @@ function nowTimestamp() {
   });
 }
 
+function formatTanggalIndo(dateStr?: string): string {
+  if (!dateStr || dateStr === "-") return "-";
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
 function newId() {
   return crypto.randomUUID();
 }
@@ -177,7 +192,11 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
   const lastMessageRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   function cleanAIResponse(text: string) {
+    if (!text) return "";
     return text
+      // Hapus sitasi tag seperti 【source=7】, 【source=2,3】, dll
+      .replace(/【source=[^】]*】/gi, "")
+      // Hapus blok catatan kaki atau disclaimer
       .replace(/catatan[:\s\S]*$/i, "")
       .replace(/note[:\s\S]*$/i, "")
       .trim();
@@ -212,6 +231,19 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     };
 
     loadSession();
+
+    const handleNewSessionEvent = () => {
+      setConversation([]);
+      const newSessionId = crypto.randomUUID();
+      setConversationId(newSessionId);
+      setSelectedFiles([]);
+      setFileError(null);
+    };
+
+    window.addEventListener("chat-new-session", handleNewSessionEvent);
+    return () => {
+      window.removeEventListener("chat-new-session", handleNewSessionEvent);
+    };
   }, [initialChatId, userId]);
 
   useEffect(() => {
@@ -497,7 +529,7 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
   }
 
   const handleCompareDocuments = useCallback(
-    async (doc1: DokumenHukum, doc2: DokumenHukum) => {
+    async (doc1: DokumenHukum, doc2: DokumenHukum, userQuery?: string) => {
       if (!conversationId || isTyping || isComparing) return;
 
       setIsComparisonOpen(false);
@@ -507,10 +539,15 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
       const doc1Info = `${doc1.judul} (No. ${doc1.nomor || "-"} Thn ${doc1.tahun || "-"})`;
       const doc2Info = `${doc2.judul} (No. ${doc2.nomor || "-"} Thn ${doc2.tahun || "-"})`;
 
+      let userMsgText = `Bandingkan Dokumen Hukum:\n• Dokumen 1: ${doc1Info}\n• Dokumen 2: ${doc2Info}`;
+      if (userQuery && userQuery.trim()) {
+        userMsgText += `\n\n: ${userQuery.trim()}`;
+      }
+
       const userMsg: ChatMessage = {
         id: newId(),
         type: "user",
-        message: `Bandingkan Dokumen Hukum:\n• Dokumen 1: ${doc1Info}\n• Dokumen 2: ${doc2Info}`,
+        message: userMsgText,
         timestamp: nowTimestamp(),
       };
 
@@ -531,8 +568,8 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
           nomor: doc1.nomor || "-",
           tahun: doc1.tahun || "-",
           status: doc1.status || "Berlaku",
-          tanggal_penetapan: doc1.tanggal_penetapan || "-",
-          tanggal_berlaku: doc1.tanggal_berlaku || "-",
+          tanggal_penetapan: formatTanggalIndo(doc1.tanggal_penetapan),
+          tanggal_berlaku: formatTanggalIndo(doc1.tanggal_berlaku),
           sumber: doc1.sumber || "JDIH BIN",
           tempat_penetapan: doc1.tempat_penetapan || "Jakarta",
         },
@@ -542,8 +579,8 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
           nomor: doc2.nomor || "-",
           tahun: doc2.tahun || "-",
           status: doc2.status || "Berlaku",
-          tanggal_penetapan: doc2.tanggal_penetapan || "-",
-          tanggal_berlaku: doc2.tanggal_berlaku || "-",
+          tanggal_penetapan: formatTanggalIndo(doc2.tanggal_penetapan),
+          tanggal_berlaku: formatTanggalIndo(doc2.tanggal_berlaku),
           sumber: doc2.sumber || "JDIH BIN",
           tempat_penetapan: doc2.tempat_penetapan || "Jakarta",
         },
@@ -575,8 +612,8 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
           },
           {
             kategori: "Tanggal & Tempat Penetapan",
-            doc1Value: `${doc1.tempat_penetapan || "Jakarta"}, ${doc1.tanggal_penetapan || "-"}`,
-            doc2Value: `${doc2.tempat_penetapan || "Jakarta"}, ${doc2.tanggal_penetapan || "-"}`,
+            doc1Value: `${doc1.tempat_penetapan || "Jakarta"}, ${formatTanggalIndo(doc1.tanggal_penetapan)}`,
+            doc2Value: `${doc2.tempat_penetapan || "Jakarta"}, ${formatTanggalIndo(doc2.tanggal_penetapan)}`,
             analisis:
               "Memastikan validitas aspek formil pengesahan dan tanggal mulai berlaku efektifnya ketentuan hukum.",
           },
@@ -595,16 +632,27 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
               "Harmonisasi memitigasi tumpang tindih regulasi, menguji konsistensi asas kepastian hukum, dan memperkuat kepatuhan kedinasan.",
           },
         ],
-        kesimpulan: `Berdasarkan perbandingan komparatif terhadap "${doc1.judul}" dan "${doc2.judul}", kedua produk hukum memiliki keterkaitan substantif dalam tata kelola regulasi dan pelaksanaan fungsi intelijen negara.`,
+        kesimpulan: `Berdasarkan perbandingan komparatif terhadap "${doc1.judul}" dan "${doc2.judul}", kedua produk hukum memiliki keterkaitan substantif dalam tata kelola regulasi dan pelaksanaan fungsi intelijen negara.${
+          userQuery ? ` Analisis terhadap fokus "${userQuery}": kedua dokumen memiliki pembagian norma dan materi muatan yang berbeda sesuai lingkup hierarki peraturannya.` : ""
+        }`,
         rekomendasi:
           "Disarankan untuk mengacu pada regulasi terbaru serta senantiasa memastikan kepatuhan terhadap hierarki perundang-undangan dan asas lex superior / lex posterior.",
       };
 
       try {
-        const prompt = `Analisis perbandingan komparatif hukum antara:\n1. ${doc1.judul} (Nomor: ${doc1.nomor || "-"}, Tahun: ${doc1.tahun || "-"}, Status: ${doc1.status || "Berlaku"})\n2. ${doc2.judul} (Nomor: ${doc2.nomor || "-"}, Tahun: ${doc2.tahun || "-"}, Status: ${doc2.status || "Berlaku"}). Jelaskan secara ringkas poin harmonisasi dan implikasi hukum intelijen negara.`;
+        const prompt = `Analisis perbandingan komparatif hukum antara dua dokumen berikut:\n1. ${doc1.judul} (Nomor: ${doc1.nomor || "-"}, Tahun: ${doc1.tahun || "-"}, Status: ${doc1.status || "Berlaku"})\n2. ${doc2.judul} (Nomor: ${doc2.nomor || "-"}, Tahun: ${doc2.tahun || "-"}, Status: ${doc2.status || "Berlaku"}).\n${userQuery ? `Fokus pertanyaan pengguna: ${userQuery}\n` : ""}\nInstruksi format:\n- Sajikan analisis perbandingan dan harmonisasi secara rapi dan profesional.\n- Jangan sertakan tag sitasi seperti 【source=...】.\n- Gunakan format markdown standar (tabel Markdown GFM untuk komparasi aspek, poin-poin bullet list, dan penomoran ringkas).`;
 
-        const res = await sendChatMessage(prompt, conversationId);
-        const aiResponse = res.message ? cleanAIResponse(res.message) : "";
+        // Gunakan timeout 10 detik agar UI tidak stuck jika backend lambat/offline
+        const timeoutPromise = new Promise<{ message?: string }>((resolve) =>
+          setTimeout(() => resolve({ message: "" }), 10000)
+        );
+
+        const res = await Promise.race([
+          sendChatMessage(prompt, conversationId),
+          timeoutPromise,
+        ]);
+
+        const aiResponse = res?.message ? cleanAIResponse(res.message) : "";
 
         if (aiResponse) {
           comparisonPayload.kesimpulan = aiResponse;
@@ -643,7 +691,7 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
       setComparisonErrorMsg(null);
 
       if (!comparisonDoc1 || !comparisonDoc2) {
-        setComparisonErrorMsg("Minimal harus memilih 2 dokumen hukum untuk dibandingkan.");
+        setComparisonErrorMsg("Minimal harus memilih 2 dokumen hukum untuk dibandingkan. Keduanya wajib diisi.");
         return;
       }
 
@@ -655,7 +703,9 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
         return;
       }
 
-      await handleCompareDocuments(comparisonDoc1, comparisonDoc2);
+      const queryText = message.trim();
+      setMessage("");
+      await handleCompareDocuments(comparisonDoc1, comparisonDoc2, queryText);
       return;
     }
 

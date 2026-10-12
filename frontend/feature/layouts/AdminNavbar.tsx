@@ -32,7 +32,7 @@ export default function AdminNavbar({ onMenuClick, title, subtitle }: AdminNavba
           setChatTitle("Sesi Chat Baru");
         }
       } else if (pathname === "/admin/chat") {
-        setChatTitle("Asisten AI HDH");
+        setChatTitle("Asisten HDH");
       }
     };
 
@@ -51,7 +51,7 @@ export default function AdminNavbar({ onMenuClick, title, subtitle }: AdminNavba
       return { title: "Manajemen Pengguna", subtitle: "Kelola Akses & Petugas" };
     }
     if (pathname.startsWith("/admin/chat")) {
-      return { title: chatTitle || "Asisten AI HDH", subtitle: "Konsultasi & Analisis Regulasi Cerdas" };
+      return { title: chatTitle || "Asisten HDH", subtitle: "Konsultasi & Analisis Regulasi Cerdas" };
     }
     if (pathname === "/admin/berita") {
       return { title: "Berita & Publikasi", subtitle: "Kelola Siaran & Berita Hukum" };

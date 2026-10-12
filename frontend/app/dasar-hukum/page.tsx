@@ -80,7 +80,7 @@ export default function DasarHukumPage() {
 
       <p className="mt-4 max-w-xl text-sm leading-6 text-muted-foreground">
         Landasan peraturan dan ketentuan yang menjadi dasar penyelenggaraan
-        Jaringan Dokumentasi dan Informasi Hukum Badan Intelijen Negara.
+        Harmonisasi Dokumen Hukum Badan Intelijen Negara.
       </p>
 
       <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">

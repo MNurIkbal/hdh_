@@ -44,7 +44,7 @@ export function proxy(request: NextRequest) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Akses Ditolak - JARINGAN DOKUMENTASI DAN INFORMASI HUKUM</title>
+  <title>Akses Ditolak - Harmonisasi Dokumen Hukum</title>
   <meta name="robots" content="noindex, nofollow">
   <style>
     :root {
@@ -148,7 +148,7 @@ export function proxy(request: NextRequest) {
     <h1>Area Terbatas</h1>
 
     <p>
-      Anda mencoba mengakses halaman internal JDIH.
+      Anda mencoba mengakses halaman internal HDH.
       Silakan masuk menggunakan akun yang memiliki hak akses
       untuk melanjutkan.
     </p>
@@ -156,7 +156,7 @@ export function proxy(request: NextRequest) {
     <div class="footer">
       Sistem Terpadu &bull;
       <span class="hospital-name">
-        JARINGAN DOKUMENTASI DAN INFORMASI HUKUM
+      Harmonisasi Dokumen Hukum
       </span>
     </div>
   </div>

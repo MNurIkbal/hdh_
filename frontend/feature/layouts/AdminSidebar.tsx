@@ -292,11 +292,10 @@ export default function AdminSidebar({
                 <span className="text-[17px] font-bold tracking-tight text-white">
                   HDH
                 </span>
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C9A15A] shadow-[0_0_6px_#C9A15A]" />
               </div>
 
               <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#F3E2B8]">
-                Portal Regulasi BIN
+                Harmonisasi Dokumen Hukum
               </div>
             </div>
           </Link>
@@ -402,19 +401,23 @@ export default function AdminSidebar({
             })}
           </div>
 
-          {/* AI Chat History */}
+          {/* Chat History */}
           <div className="mt-7 px-3 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-              Riwayat AI Chat
+              Riwayat Chat
             </span>
-            <Link
-              href="/admin/chat" 
-              onClick={onClose}
+            <button
+              type="button"
+              onClick={() => {
+                onClose?.();
+                window.dispatchEvent(new Event("chat-new-session"));
+                router.push("/admin/chat");
+              }}
               className="flex h-5 w-5 items-center justify-center rounded-md border border-white/10 bg-white/[0.06] text-slate-300 hover:border-[#C9A15A]/50 hover:text-[#F3E2B8] hover:bg-white/10 transition-colors"
               title="Buat Sesi Baru"
             >
               <Plus size={13} />
-            </Link>
+            </button>
           </div>
 
           <div className={`mt-2 space-y-1 pr-1 ${dropdownOpen ? 'overflow-visible' : 'overflow-y-auto'}`} style={{ maxHeight: '350px' }}>
