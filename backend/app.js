@@ -19,7 +19,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:3001",
   "http://localhost:8081",
-  "https://jdih.asiasistem.com",
+  "https://hdh.asiasistem.com",
   "https://hdh-be.asiasistem.com"
 ];
 
