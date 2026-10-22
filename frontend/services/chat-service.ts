@@ -1,4 +1,5 @@
 import { createApiClient } from "@/lib/api";
+import type { ChatApiResponse } from "@/types/chat";
 
 const chatApi = createApiClient("/master-data/chat");
 

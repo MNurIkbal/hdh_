@@ -1,0 +1,35 @@
+"use client";
+
+import { useState } from "react";
+
+import AdminNavbar from "@/feature/layouts/AdminNavbar";
+import AdminSidebar from "@/feature/layouts/AdminSidebar";
+import AdminFooter from "@/feature/layouts/AdminFooter";
+import DraftPeraturanComponent from "@/feature/draft-peraturan/components/DraftPeraturanComponent";
+
+export default function DraftPeraturanPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen bg-slate-100/70 text-slate-900 transition-colors duration-300 dark:bg-[#070D18] dark:text-slate-100">
+      <AdminSidebar
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <div className="lg:pl-[275px] flex flex-col min-h-screen">
+        <AdminNavbar
+          onMenuClick={() => setSidebarOpen(true)}
+          title="Draft Peraturan"
+          subtitle="Manajemen penyusunan dan harmonisasi rancangan peraturan dokumen hukum"
+        />
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+          <DraftPeraturanComponent />
+        </main>
+
+        <AdminFooter />
+      </div>
+    </div>
+  );
+}

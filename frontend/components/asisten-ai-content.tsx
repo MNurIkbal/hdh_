@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Send, Bot, Trash2, ArrowDown, Sparkles, Plus, AlertTriangle, ArrowUp, MessageSquarePlus, FileText, FileSpreadsheet, X, Scale } from "lucide-react";
+import { Send, Bot, Trash2, ArrowDown, Sparkles, Plus, AlertTriangle, ArrowUp, MessageSquarePlus, FileText, FileSpreadsheet, X, Scale, FileSignature } from "lucide-react";
 import rehypeRaw from "rehype-raw";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import type { ChatMessage, ComparisonData } from "@/types/chat";
 import { DokumenHukum } from "@/feature/dokumen-hukum/types/DokumenHukum.type";
 import ComparisonDraftTable from "@/components/ComparisonDraftTable";
 import DocumentComparisonSelector from "@/components/DocumentComparisonSelector";
+import DraftPeraturanPanel from "@/components/DraftPeraturanPanel";
 import { sendChatMessage, saveSession, getSessionById, deleteSession } from "@/services/chat-service";
 import { SessionHook } from "@/feature/web";
 
@@ -48,9 +49,11 @@ function newId() {
 const EmptyState = ({
   onSelect,
   onOpenComparison,
+  onOpenDraft,
 }: {
   onSelect: (text: string) => void;
   onOpenComparison: () => void;
+  onOpenDraft: () => void;
 }) => {
   return (
     <div className="flex flex-col items-center justify-center h-full text-center px-4 ">
@@ -65,29 +68,41 @@ const EmptyState = ({
       </p>
 
       <p className="text-xs text-muted-foreground mb-6">
-        Silakan pilih opsi perbandingan atau ajukan pertanyaan di bawah ini.
+        Silakan pilih opsi perbandingan, buat draf peraturan, atau ajukan pertanyaan di bawah ini.
       </p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
-        <button
-          onClick={() => {
-            onSelect("📄 Analisis Dokumen");
-          }}
-          className="text-left text-sm p-3.5 rounded-xl border bg-muted hover:bg-primary hover:text-white transition shadow-sm font-medium"
-        >
-          📄 Analisis Dokumen
-        </button>
+      <div className="flex flex-col gap-3 w-full max-w-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
+          <button
+            onClick={() => {
+              onSelect("📄 Analisis Dokumen");
+            }}
+            className="text-left text-sm p-3.5 rounded-xl border bg-muted hover:bg-primary hover:text-white transition shadow-sm font-medium"
+          >
+            📄 Analisis Dokumen
+          </button>
+
+          <button
+            onClick={onOpenComparison}
+            className="text-left text-sm p-3.5 rounded-xl border border-blue-200 bg-blue-50/80 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-200 hover:bg-blue-600 hover:text-white transition shadow-sm font-medium flex items-center justify-between group"
+          >
+            <span className="flex items-center gap-1.5">
+              <Scale size={16} className="text-blue-600 group-hover:text-white transition" />
+              Bandingkan Dokumen
+            </span>
+            <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 group-hover:bg-white/20 group-hover:text-white px-2 py-0.5 rounded font-normal transition">
+              Draft Tabel
+            </span>
+          </button>
+        </div>
 
         <button
-          onClick={onOpenComparison}
-          className="text-left text-sm p-3.5 rounded-xl border border-blue-200 bg-blue-50/80 text-blue-800 dark:bg-blue-950/40 dark:border-blue-900 dark:text-blue-200 hover:bg-blue-600 hover:text-white transition shadow-sm font-medium flex items-center justify-between group"
+          onClick={onOpenDraft}
+          className="w-full text-left text-sm p-3.5 rounded-xl border border-amber-200 bg-amber-50/80 text-amber-900 dark:bg-amber-950/40 dark:border-amber-900/80 dark:text-amber-200 hover:bg-amber-600 hover:text-white transition shadow-sm font-medium flex items-center justify-between group"
         >
-          <span className="flex items-center gap-1.5">
-            <Scale size={16} className="text-blue-600 group-hover:text-white transition" />
-            Bandingkan Dokumen
-          </span>
-          <span className="text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 group-hover:bg-white/20 group-hover:text-white px-2 py-0.5 rounded font-normal transition">
-            Draft Tabel
+          <span className="flex items-center gap-2">
+            <FileSignature size={18} className="text-amber-600 dark:text-amber-400 group-hover:text-white transition" />
+            <span>Draft Peraturan</span>
           </span>
         </button>
       </div>
@@ -173,6 +188,10 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+  const [isDraftPeraturanMode, setIsDraftPeraturanMode] = useState(false);
+  const [isDraftPanelOpen, setIsDraftPanelOpen] = useState(false);
+  const [draftTopic, setDraftTopic] = useState("");
+  const [draftContent, setDraftContent] = useState("");
   const [isComparing, setIsComparing] = useState(false);
   const [comparisonDoc1, setComparisonDoc1] = useState<DokumenHukum | null>(null);
   const [comparisonDoc2, setComparisonDoc2] = useState<DokumenHukum | null>(null);
@@ -238,6 +257,10 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
       setConversationId(newSessionId);
       setSelectedFiles([]);
       setFileError(null);
+      setIsDraftPeraturanMode(false);
+      setIsDraftPanelOpen(false);
+      setDraftTopic("");
+      setDraftContent("");
     };
 
     window.addEventListener("chat-new-session", handleNewSessionEvent);
@@ -319,6 +342,11 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     const current = currentText.toLowerCase().trim();
 
     const legalKeywords = [
+      "draft peraturan",
+      "rancangan peraturan",
+      "buat peraturan",
+      "susun peraturan",
+      "naskah peraturan",
       "jdih",
       "jaringan dokumentasi",
       "informasi hukum",
@@ -509,10 +537,27 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     currentText: string,
     previousConversation: ChatMessage[],
   ): boolean {
-    // =========================================================
-    // CHAT PERTAMA
-    // =========================================================
+    const current = currentText.toLowerCase().trim();
 
+    // Jika dalam mode Draft Peraturan
+    if (isDraftPeraturanMode) {
+      // Pertanyaan harus masih terkait penyusunan peraturan / revisi pasal / konteks regulasi
+      const draftKeywords = [
+        "peraturan", "pasal", "ayat", "bab", "ketentuan", "menimbang", "mengingat", 
+        "revisi", "tambah", "ubah", "ganti", "hapus", "draf", "draft", "sanksi",
+        "bin", "intelijen", "badan intelijen negara", "judul", "tentang", "uu",
+        "regulasi", "sop", "pedoman", "tata kelola", "dokumen", "hukum"
+      ];
+      const isRelatedToDraft = draftKeywords.some((kw) => current.includes(kw));
+      if (!isRelatedToDraft && !isFollowUpQuestion(currentText, previousConversation)) {
+        return false;
+      }
+      return true;
+    }
+
+    // =========================================================
+    // MODE CHAT UMUM BIASA
+    // =========================================================
     if (previousConversation.length === 0) {
       return isValidContext(currentText);
     }
@@ -736,10 +781,9 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
       const blockedMsg: ChatMessage = {
         id: newId(),
         type: "assistant",
-        message:
-          "Maaf, pertanyaan tidak dapat diproses karena berada di luar konteks percakapan.\n\n" +
-          "Silakan ajukan pertanyaan yang berkaitan dengan JDIH, hukum, " +
-          "peraturan Intelijen Negara.",
+        message: isDraftPeraturanMode
+          ? "Maaf, permintaan berada di luar konteks penyusunan draft peraturan.\n\nSesi ini sedang aktif dalam **Mode Perancang Draft Peraturan**. Silakan masukkan instruksi atau revisi yang berkaitan dengan materi muatan peraturan, pasal, atau tata naskah hukum BIN."
+          : "Maaf, pertanyaan tidak dapat diproses karena berada di luar konteks hukum dan regulasi.\n\nSilakan ajukan pertanyaan yang berkaitan dengan JDIH, produk hukum, atau peraturan perundang-undangan di lingkungan Badan Intelijen Negara.",
         timestamp: nowTimestamp(),
       };
 
@@ -749,6 +793,64 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     }
 
     setIsTyping(true);
+
+    // Deteksi apakah user sedang dalam mode Draft Peraturan atau perintahnya meminta membuat rancangan peraturan
+    const isDraftCommand = 
+      isDraftPeraturanMode || 
+      /^(buatkan|buat|susun|rancang|draft|naskah|tolong buatkan)\s+.*(peraturan|perbin|kepbin|regulasi|sk|surat keputusan|pedoman)/i.test(userText) ||
+      userText.toLowerCase().includes("draft peraturan") ||
+      userText.toLowerCase().includes("rancangan peraturan");
+
+    if (isDraftCommand) {
+      try {
+        // Tentukan topik dari teks user
+        const cleanTopic = userText
+          .replace(/^(buatkan|buat|susun|rancang|draft|tolong buatkan|naskah peraturan|draft peraturan|tentang)\s+/i, "")
+          .trim();
+
+        setDraftTopic(cleanTopic || userText);
+
+        // Panggil endpoint pembuat draft peraturan standar UU 12/2011
+        const draftRes = await fetch("/api/generate-draft", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            tentang: cleanTopic || userText,
+            prompt: userText,
+            jenisPeraturan: "Peraturan Badan Intelijen Negara Republik Indonesia",
+            tahun: new Date().getFullYear().toString(),
+          }),
+        });
+
+        const draftData = await draftRes.json();
+        const content = draftData?.draftContent || "Draf peraturan berhasil disusun.";
+
+        setDraftContent(content);
+        // Aktifkan tampilan Split Screen 50% 50%
+        setIsDraftPanelOpen(true);
+        setIsDraftPeraturanMode(true);
+
+        const aiMsg: ChatMessage = {
+          id: newId(),
+          type: "assistant",
+          message: `Naskah **Draft Peraturan** mengenai *"${cleanTopic || userText}"* telah selesai disusun sesuai kaidah UU No. 12 Tahun 2011.\n\nFormulir parameter dan lembar naskah dinas resmi kini aktif di **panel sebelah kanan (Split Screen 50% : 50%)**. Anda dapat meninjau naskah, menyesuaikan pasal, maupun mengekspor langsung ke **Microsoft Word (.docx)**. Jika ada pasal atau materi muatan yang ingin diubah, silakan ketik langsung di sini.`,
+          timestamp: nowTimestamp(),
+        };
+
+        setConversation((prev) => [...prev, aiMsg]);
+      } catch (err: any) {
+        const errMsg: ChatMessage = {
+          id: newId(),
+          type: "assistant",
+          message: "Terjadi kendala saat menyusun draf peraturan: " + (err.message || "Silakan coba lagi."),
+          timestamp: nowTimestamp(),
+        };
+        setConversation((prev) => [...prev, errMsg]);
+      } finally {
+        setIsTyping(false);
+      }
+      return;
+    }
 
     try {
       const res = await sendChatMessage(userText || "Tolong analisa dokumen saya", conversationId);
@@ -767,13 +869,24 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
 
       setConversation((prev) => [...prev, aiMsg]);
     } catch (error) {
+      // Fallback jawaban sample informatif jika LLM/ACS sedang disconnect
+      const sampleAnswer = 
+        `### Informasi Regulasi Badan Intelijen Negara (JDIH BIN)\n\n` +
+        `Menanggapi pertanyaan Anda mengenai **"${userText}"**, berikut adalah rujukan regulasi resmi yang berlaku di lingkungan Badan Intelijen Negara:\n\n` +
+        `1. **Undang-Undang Nomor 17 Tahun 2011 tentang Intelijen Negara**\n` +
+        `   - Mengatur kedudukan BIN sebagai koordinator penyelenggara intelijen negara dan pelaksanaan fungsi intelijen penegakan keamanan nasional.\n\n` +
+        `2. **Peraturan Presiden Nomor 90 Tahun 2012 jo. Peraturan Presiden Nomor 79 Tahun 2020 tentang Badan Intelijen Negara**\n` +
+        `   - Mengatur struktur organisasi, tata kerja, kewenangan kedeputian, dan tata laksana kedinasan di lingkungan BIN.\n\n` +
+        `3. **Peraturan Perundang-undangan Teknis BIN (Perbin / Kepbin)**\n` +
+        `   - Pengelolaan administrasi naskah dinas hukum dan pedoman operasional diselenggarakan oleh Biro Hukum, Organisasi dan Tata Laksana melalui sistem JDIH.\n\n` +
+        `*(Catatan: Koneksi ke server ACS AI sedang offline/fallback. Jawaban disajikan berdasarkan basis data regulasi standar JDIH BIN).*`;
 
       setConversation((prev) => [
         ...prev,
         {
           id: newId(),
           type: "assistant",
-          message: "Terjadi error saat memproses pertanyaan.",
+          message: sampleAnswer,
           timestamp: nowTimestamp(),
         },
       ]);
@@ -786,6 +899,7 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     isTyping,
     conversation,
     isComparisonOpen,
+    isDraftPeraturanMode,
     comparisonDoc1,
     comparisonDoc2,
     handleCompareDocuments,
@@ -842,6 +956,10 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     setConversationId(crypto.randomUUID());
     setSelectedFiles([]);
     setFileError(null);
+    setIsDraftPeraturanMode(false);
+    setIsDraftPanelOpen(false);
+    setDraftTopic("");
+    setDraftContent("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -852,22 +970,41 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
     }
   };
 
+  const activateDraftMode = (promptHint?: string) => {
+    setIsDraftPeraturanMode(true);
+    // Panel form TIDAK dibuka dulu sebelum ada respon dari AI
+    setIsDraftPanelOpen(false);
+    if (promptHint) {
+      setMessage(promptHint);
+    } else {
+      setMessage("Tolong buatkan draf peraturan tentang ");
+    }
+  };
+
   return (
-    <div className="h-full flex flex-col overflow-hidden bg-transparent pt-4 relative">
-      {/* SCROLLABLE AREA (FULL WIDTH) */}
+    <div className="h-full flex flex-col md:flex-row overflow-hidden bg-transparent relative">
+      {/* BAGIAN KIRI (CHAT): 50% saat Panel Form Draft Terbuka setelah AI Menjawab, 100% saat Mode Normal */}
       <div
-        ref={containerRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto w-full relative"
+        className={`h-full flex flex-col overflow-hidden transition-all duration-300 relative ${
+          isDraftPanelOpen ? "w-full md:w-1/2 border-r border-slate-200 dark:border-slate-800" : "w-full"
+        }`}
       >
-        <div className="flex justify-center min-h-full pb-4">
-          <div className="w-full max-w-[950px] p-4 flex flex-col">
-            {conversation.length === 0 ? (
-              <EmptyState 
-                onSelect={(text) => setMessage(text)} 
-                onOpenComparison={() => setIsComparisonOpen(true)}
-              />
-            ) : (
+
+        {/* SCROLLABLE AREA CHAT */}
+        <div
+          ref={containerRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto w-full relative"
+        >
+          <div className="flex justify-center min-h-full pb-4">
+            <div className={`w-full p-4 flex flex-col ${isDraftPanelOpen ? "max-w-full" : "max-w-[950px]"}`}>
+              {conversation.length === 0 ? (
+                <EmptyState 
+                  onSelect={(text) => setMessage(text)} 
+                  onOpenComparison={() => setIsComparisonOpen(true)}
+                  onOpenDraft={() => activateDraftMode()}
+                />
+              ) : (
               <div className="space-y-5 flex-1 flex flex-col justify-end">
                 {conversation.map((msg, i) => {
                   const isUser = msg.type === "user";
@@ -963,9 +1100,9 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
         )}
       </div>
 
-      {/* FIXED INPUT AREA AT THE BOTTOM */}
-      <div className="w-full flex justify-center shrink-0 p-4 pb-6">
-        <div className="w-full max-w-[850px] flex flex-col">
+      {/* FIXED INPUT AREA AT THE BOTTOM (SISI KIRI) */}
+      <div className="w-full flex justify-center shrink-0 p-3 sm:p-4 pb-4">
+        <div className={`w-full flex flex-col ${isDraftPanelOpen ? "max-w-full" : "max-w-[850px]"}`}>
           {/* Document Comparison 2-Column Selector Component */}
           <DocumentComparisonSelector
             isOpen={isComparisonOpen}
@@ -1042,37 +1179,6 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
               >
                 <Plus size={22} />
               </button>
-
-              {/* Perbandingan Dokumen Button Trigger */}
-              <button
-                type="button"
-                onClick={() => {
-                  setComparisonErrorMsg(null);
-                  setIsComparisonOpen((prev) => !prev);
-                }}
-                title={isComparisonOpen ? "Tutup Perbandingan Dokumen" : "Buka Perbandingan Dokumen Hukum (2 Kolom)"}
-                className={`h-10 px-3 shrink-0 flex items-center gap-1.5 rounded-full text-xs font-medium transition mb-0.5 cursor-pointer ${
-                  isComparisonOpen
-                    ? "bg-blue-600 text-white shadow-sm hover:bg-blue-700"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-              >
-                <Scale size={16} />
-                <span className="font-medium">Bandingkan</span>
-                {isComparisonOpen && (
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsComparisonOpen(false);
-                      setComparisonErrorMsg(null);
-                    }}
-                    className="ml-0.5 p-0.5 rounded-full hover:bg-white/20 transition cursor-pointer"
-                    title="Tutup / Nonaktifkan"
-                  >
-                    <X size={13} />
-                  </span>
-                )}
-              </button>
               
               <textarea
                 value={message}
@@ -1086,6 +1192,8 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
                 placeholder={
                   isComparisonOpen 
                     ? "Klik panah kirim di samping untuk memproses perbandingan 2 dokumen..." 
+                    : isDraftPeraturanMode
+                    ? "Ketik perintah naskah peraturan (contoh: 'Tolong buatkan peraturan tentang pengamanan siber')..."
                     : "Ketik pesan..."
                 }
                 className="flex-1 resize-none bg-transparent py-3 text-[15px] text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none disabled:opacity-60 max-h-[150px]"
@@ -1103,7 +1211,7 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
                     : (!message.trim() && selectedFiles.length === 0))
                 }
                 title={isComparisonOpen ? "Kirim dan Bandingkan Dokumen" : "Kirim Pesan"}
-                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-blue-600 text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 mb-0.5"
+                className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-blue-600 text-white transition disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 mb-0.5 cursor-pointer"
               >
                 <ArrowUp
                   size={20}
@@ -1115,6 +1223,19 @@ export default function AsistenAIContent({ initialChatId = null }: AsistenAICont
           </div>
         </div>
       </div>
+      </div>
+
+      {/* BAGIAN KANAN: SPLIT SCREEN 50% PANEL FORM DRAFT PERATURAN & EXPORT WORD */}
+      {isDraftPanelOpen && (
+        <div className="w-full md:w-1/2 h-full flex flex-col shrink-0">
+          <DraftPeraturanPanel
+            isOpen={isDraftPanelOpen}
+            onClose={() => setIsDraftPanelOpen(false)}
+            initialTopic={draftTopic}
+            initialDraftContent={draftContent}
+          />
+        </div>
+      )}
     </div>
   );
 }

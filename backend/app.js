@@ -8,6 +8,7 @@ const beritaRoutes = require("./routes/berita.routes");
 const kontakRoute = require("./routes/kontak.route");
 const userRoute = require("./routes/user.route");
 const dokumenHukumRoute = require("./routes/dokumenHukum.route");
+const draftPeraturanRoute = require("./routes/draftPeraturan.route");
 const pengaturanRoute = require("./routes/pengaturan.route");
 const authRoutes = require("./routes/auth.route");
 const WebRoute = require("./routes/web.route");
@@ -17,6 +18,7 @@ const authMiddleware = require("./middleware/authMiddleware");
 const app = express();
 
 const allowedOrigins = [
+  "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:8081",
   "https://hdh.asiasistem.com",
@@ -91,6 +93,8 @@ app.use("/api/master-data/kontak",authMiddleware, kontakRoute);
 app.use("/api/master-data/user",authMiddleware, userRoute);
 
 app.use("/api/master-data/dokumen-hukum",authMiddleware, dokumenHukumRoute);
+
+app.use("/api/master-data/draft-peraturan", authMiddleware, draftPeraturanRoute);
 
 app.use("/api/master-data/pengaturan",authMiddleware, pengaturanRoute);
 

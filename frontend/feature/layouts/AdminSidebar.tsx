@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   FileText,
+  FileClock,
   Users,
   MessageSquare,
   X,
@@ -39,6 +40,11 @@ const MENU = [
     label: "Dokumen Hukum",
     href: "/admin/dokumen-hukum",
     icon: FileText,
+  },
+  {
+    label: "Draft Peraturan",
+    href: "/admin/draft-peraturan",
+    icon: FileClock,
   },
   {
     label: "Pengguna",

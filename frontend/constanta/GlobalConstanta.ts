@@ -331,3 +331,37 @@ export const getTahunOptions = () => {
 
 export const tahunOptions: { value: string; label: string }[] =
   getTahunOptions();
+
+export const kategoriDraftOptions = [
+  { value: "", label: "Pilih kategori rancangan" },
+  { value: "Rancangan Peraturan Kepala Lembaga", label: "Rancangan Peraturan Kepala Lembaga" },
+  { value: "Rancangan Peraturan Kepala BIN", label: "Rancangan Peraturan Kepala BIN" },
+  { value: "Rancangan Keputusan Kepala BIN", label: "Rancangan Keputusan Kepala BIN" },
+  { value: "Rancangan Instruksi Kepala BIN", label: "Rancangan Instruksi Kepala BIN" },
+  { value: "Rancangan Surat Edaran", label: "Rancangan Surat Edaran" },
+  { value: "Rancangan Peraturan Perundang-undangan", label: "Rancangan Peraturan Perundang-undangan" },
+  { value: "Rancangan Perjanjian Kerja Sama", label: "Rancangan Perjanjian Kerja Sama" },
+  { value: "Rancangan Standar Operasional Prosedur (SOP)", label: "Rancangan SOP" },
+  { value: "Rancangan Regulasi Lainnya", label: "Rancangan Regulasi Lainnya" },
+];
+
+export const tahapanDraftOptions = [
+  { value: "", label: "Pilih tahapan pembahasan" },
+  { value: "Perencanaan / Usulan", label: "Perencanaan / Usulan" },
+  { value: "Penyusunan Draft Awal", label: "Penyusunan Draft Awal" },
+  { value: "Harmonisasi & Sinkronisasi", label: "Harmonisasi & Sinkronisasi" },
+  { value: "Uji Publik / Konsultasi", label: "Uji Publik / Konsultasi" },
+  { value: "Pembahasan Antar Unit / Instansi", label: "Pembahasan Antar Unit" },
+  { value: "Fasilitasi / Evaluasi Hukum", label: "Fasilitasi / Evaluasi Hukum" },
+  { value: "Finalisasi / Siap Ditetapkan", label: "Finalisasi / Siap Ditetapkan" },
+];
+
+export const statusDraftOptions = [
+  { value: "", label: "Pilih status draft" },
+  { value: "Draft", label: "Draft" },
+  { value: "Dalam Pembahasan", label: "Dalam Pembahasan" },
+  { value: "Perlu Revisi", label: "Perlu Revisi" },
+  { value: "Disetujui", label: "Disetujui" },
+  { value: "Ditolak", label: "Ditolak" },
+  { value: "Siap Diundangkan", label: "Siap Diundangkan" },
+];

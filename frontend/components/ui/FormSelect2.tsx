@@ -587,9 +587,16 @@ export default function FormSelect2<
       border: "1px solid #e5e7eb",
 
       boxShadow:
-        "0 10px 30px rgba(0,0,0,0.10)",
+        "0 10px 30px rgba(0,0,0,0.15)",
 
-      zIndex: 9999,
+      zIndex: 99999,
+    }),
+
+    menuPortal: (
+      base
+    ) => ({
+      ...base,
+      zIndex: 99999,
     }),
 
     menuList: (
@@ -787,7 +794,9 @@ export default function FormSelect2<
 
               menuPlacement="auto"
 
-              menuPosition="absolute"
+              menuPosition="fixed"
+
+              menuPortalTarget={typeof document !== "undefined" ? document.body : undefined}
 
               closeMenuOnSelect
 
